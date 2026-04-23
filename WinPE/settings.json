@@ -1,0 +1,11 @@
+﻿{
+    "Architecture":  "amd64",
+    "DriverSource":  "D:\\temp\\WinPE\\driver",
+    "ADK_Path":  "C:\\Program Files (x86)\\Windows Kits\\10\\Assessment and Deployment Kit",
+    "ToolsSource":  "D:\\temp\\WinPE\\APPS",
+    "OutputPath":  "\"C:\\Temp\\opsi_winpe2.1\"",
+    "ProductId":  "win11-x64",
+    "LastRun":  "2026-04-14 11:14:40",
+    "IsoPath":  "D:\\temp\\Win11_Ent_hard.iso",
+    "WorkingPath":  "C:\\temp_winPE_working"
+}

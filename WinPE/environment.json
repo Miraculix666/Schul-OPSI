@@ -1,0 +1,47 @@
+﻿{
+    "Build":  {
+                  "ADK_Path":  "C:\\Program Files (x86)\\Windows Kits\\10\\Assessment and Deployment Kit",
+                  "Architecture":  "amd64",
+                  "CachePath":  "c:\\temp\\winPE\\cache",
+                  "DriverSource":  "D:\\temp\\WinPE\\driver",
+                  "IsoPath":  "D:\\temp\\Win11_Ent_hard.iso",
+                  "OutputPath":  "c:\\temp\\winpe\\2.5",
+                  "ToolsSource":  "D:\\temp\\WinPE\\APPS",
+                  "UseCache":  true,
+                  "WorkingPath":  "c:\\temp\\winPE\\working"
+              },
+    "Product":  {
+                    "ImageIndex":  1,
+                    "ProductId":  "win11-x64",
+                    "ProductName":  "Windows 11 LTSC Enterprise",
+                    "ProductVersion":  "2024"
+                },
+    "Windows":  {
+                    "AdminPassword":  "nt123!",
+                    "AdminUser":  "admin",
+                    "ComputerName":  "*",
+                    "Locale":  "de-DE",
+                    "ProductKey":  "M7XTQ-FN8P6-TTKYV-9D4CC-J462D",
+                    "TimeZone":  "W. Europe Standard Time"
+                },
+    "OPSI":  {
+                 "DepotBasePath":  "/var/lib/opsi/depot",
+                 "DepotSharePath":  "Y:\\",
+                 "ImageName":  "",
+                 "ServerAddress":  "sopsi",
+                 "ServerUser":  "root"
+             },
+    "Deployment":  {
+                       "AskBeforeInstall":  false,
+                       "BypassCPUCheck":  true,
+                       "BypassRAMCheck":  true,
+                       "BypassTPMCheck":  true,
+                       "HardwareCheck":  false,
+                       "InstallTo":  "disk"
+                   },
+    "Meta":  {
+                 "LastRun":  "2026-04-14 12:02:46",
+                 "LastRunBy":  "nw0b4746",
+                 "ScriptVersion":  "2.5.0"
+             }
+}
