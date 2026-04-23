@@ -1,6 +1,19 @@
+# Agent Framework
 .agent/
+
+# Temporary / local-only folders
 dump/
 WIP/
 locks/.locked
-*.log
 
+# Build artifacts
+*.log
+copype_*.log
+
+# IDE
+.vscode/
+*.code-workspace
+
+# OS
+Thumbs.db
+Desktop.ini

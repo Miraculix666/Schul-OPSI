@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend">
+    
+    <!-- PASS 1: windowsPE -->
+    <settings pass="windowsPE">
+        <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+            <SetupUILanguage><UILanguage>de-DE</UILanguage></SetupUILanguage>
+            <InputLocale>de-DE</InputLocale>
+            <SystemLocale>de-DE</SystemLocale>
+            <UserLocale>de-DE</UserLocale>
+            <UILanguage>de-DE</UILanguage>
+        </component>
+        
+        <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+            <UserData>
+                <ProductKey><Key>W269N-WFGWX-YVC9B-4J6C9-T83GX</Key><WillShowUI>OnError</WillShowUI></ProductKey>
+                <AcceptEula>true</AcceptEula>
+                <FullName>Admin</FullName>
+                <Organization>IT-Abteilung</Organization>
+            </UserData>
+            
+            <DiskConfiguration>
+                <Disk wcm:action="add">
+                    <DiskID>0</DiskID>
+                    <WillWipeDisk>true</WillWipeDisk>
+                    <CreatePartitions>
+                        <CreatePartition wcm:action="add"><Order>1</Order><Type>Primary</Type><Size>500</Size></CreatePartition>
+                        <CreatePartition wcm:action="add"><Order>2</Order><Type>EFI</Type><Size>100</Size></CreatePartition>
+                        <CreatePartition wcm:action="add"><Order>3</Order><Type>MSR</Type><Size>128</Size></CreatePartition>
+                        <CreatePartition wcm:action="add"><Order>4</Order><Type>Primary</Type><Extend>true</Extend></CreatePartition>
+                    </CreatePartitions>
+                    <ModifyPartitions>
+                        <ModifyPartition wcm:action="add"><Order>1</Order><PartitionID>1</PartitionID><Label>Recovery</Label><Format>NTFS</Format><TypeID>DE94BBA4-06D1-4D40-A16A-BFD50179D6AC</TypeID></ModifyPartition>
+                        <ModifyPartition wcm:action="add"><Order>2</Order><PartitionID>2</PartitionID><Label>System</Label><Format>FAT32</Format></ModifyPartition>
+                        <ModifyPartition wcm:action="add"><Order>3</Order><PartitionID>3</PartitionID></ModifyPartition>
+                        <ModifyPartition wcm:action="add"><Order>4</Order><PartitionID>4</PartitionID><Label>Windows</Label><Format>NTFS</Format><Letter>C</Letter></ModifyPartition>
+                    </ModifyPartitions>
+                </Disk>
+            </DiskConfiguration>
+            
+            <ImageInstall>
+                <OSImage>
+                    <InstallTo><DiskID>0</DiskID><PartitionID>4</PartitionID></InstallTo>
+                    <WillShowUI>OnError</WillShowUI>
+                    <InstallToAvailablePartition>false</InstallToAvailablePartition>
+                    <MetaData wcm:action="add">
+                       <Key>/IMAGE/NAME</Key>
+                       <Value>Windows 11 Enterprise</Value>
+                    </MetaData>
+                </OSImage>
+            </ImageInstall>
+            
+            <RunSynchronous>
+                <!-- WinPE Treiber -->
+                <RunSynchronousCommand wcm:action="add">
+                    <Order>1</Order>
+                    <Path>cmd.exe /c "(IF EXIST X:\Drivers\ (pnputil /add-driver X:\Drivers\*.inf /install /subdirs)) &amp;&amp; (IF EXIST W:\Drivers\ (pnputil /add-driver W:\Drivers\*.inf /install /subdirs))"</Path>
+                    <Description>WinPE Treiber-Installation</Description>
+                </RunSynchronousCommand>
+            </RunSynchronous>
+        </component>
+        
+        <component name="Microsoft-Windows-Networking-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+            <SkipNetworkUI>true</SkipNetworkUI>
+        </component>
+    </settings>
+    
+    <!-- PASS 2: specialize - HÄRTUNGSSKRIPT WIRD HIER AUSGEFÜHRT -->
+    <settings pass="specialize">
+        <component name="Microsoft-Windows-Deployment" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+            <RunSynchronous>
+                <!-- 1. Administrator aktivieren -->
+                <RunSynchronousCommand wcm:action="add">
+                    <Order>1</Order>
+                    <Path>cmd.exe /c net user Administrator nt123! /active:yes</Path>
+                    <Description>Administrator aktivieren</Description>
+                </RunSynchronousCommand>
+                
+                <!-- 2. Skript-Verzeichnis erstellen -->
+                <RunSynchronousCommand wcm:action="add">
+                    <Order>2</Order>
+                    <Path>cmd.exe /c if not exist C:\Temp\Hardening mkdir C:\Temp\Hardening</Path>
+                    <Description>Verzeichnis für Härtungsskript erstellen</Description>
+                </RunSynchronousCommand>
+                
+                <!-- 3. Skript vom Installations-Medium kopieren -->
+                <RunSynchronousCommand wcm:action="add">
+                    <Order>3</Order>
+                    <Path>cmd.exe /c "for %%d in (D E F G H I J K L M N O P Q R S T U V W X Y Z) do if exist %%d:\sources\$OEM$\$$\Setup\Scripts\Apply_Harden_Policies.ps1 (xcopy /Y /E %%d:\sources\$OEM$\$$\Setup\Scripts\*.* C:\Temp\Hardening\)"</Path>
+                    <Description>Härtungsskript kopieren</Description>
+                </RunSynchronousCommand>
+                
+                <!-- 4. KRITISCH: Härtungsskript ausführen -->
+                <RunSynchronousCommand wcm:action="add">
+                    <Order>4</Order>
+                    <Path>powershell.exe -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File "C:\Temp\Hardening\Apply_Harden_Policies.ps1" -LogLevel Standard 2>&amp;1 > C:\Temp\Hardening\execution.log</Path>
+                    <Description>Windows 11 Härtung ausführen</Description>
+                </RunSynchronousCommand>
+            </RunSynchronous>
+        </component>
+        
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+            <OOBE><BypassNRO>true</BypassNRO></OOBE>
+            <ComputerName>*</ComputerName>
+        </component>
+        
+        <!-- BitLocker verhindern -->
+        <component name="Microsoft-Windows-SecureStartup-FilterDriver" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+            <PreventDeviceEncryption>true</PreventDeviceEncryption>
+        </component>
+    </settings>
+    
+    <!-- PASS 3: oobeSystem -->
+    <settings pass="oobeSystem">
+        <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+            <InputLocale>de-DE</InputLocale>
+            <SystemLocale>de-DE</SystemLocale>
+            <UILanguage>de-DE</UILanguage>
+            <UILanguageFallback>de-DE</UILanguageFallback>
+            <UserLocale>de-DE</UserLocale>
+        </component>
+        
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+            <OOBE>
+                <HideEULAPage>true</HideEULAPage>
+                <HideLocalAccountScreen>true</HideLocalAccountScreen>
+                <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+                <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+                <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+                <ProtectYourPC>3</ProtectYourPC>
+                <NetworkLocation>Work</NetworkLocation>
+                <SkipMachineOOBE>true</SkipMachineOOBE>
+                <SkipUserOOBE>true</SkipUserOOBE>
+            </OOBE>
+            
+            <UserAccounts>
+                <LocalAccounts>
+                    <LocalAccount wcm:action="add">
+                        <Password>
+                            <Value>bgB0ADEAMgAzACEA</Value>
+                            <PlainText>false</PlainText>
+                        </Password>
+                        <Name>FirstAdmin</Name>
+                        <Description>Lokales Administratorkonto</Description>
+                        <DisplayName>FirstAdmin</DisplayName>
+                        <Group>Administrators</Group>
+                    </LocalAccount>
+                </LocalAccounts>
+            </UserAccounts>
+            
+            <AutoLogon>
+                <Enabled>true</Enabled>
+                <LogonCount>1</LogonCount>
+                <Username>FirstAdmin</Username>
+                <Password>
+                    <Value>bgB0ADEAMgAzACEA</Value>
+                    <PlainText>false</PlainText>
+                </Password>
+            </AutoLogon>
+        </component>
+    </settings>
+    
+</unattend>

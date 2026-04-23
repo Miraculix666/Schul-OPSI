@@ -1,0 +1,88 @@
+{
+    "_comment": "Schul-OPSI Zentrale Konfiguration – Wird von Build-WinPE.ps1 und Deploy-Skripten gelesen",
+
+    "Build": {
+        "_comment_IsoPath": "Pfad zur WinPE-Quell-ISO (ADK-basiert oder Windows PE ISO)",
+        "IsoPath": "D:\\temp\\WinPE.ISO",
+
+        "_comment_WinImageIsoPath": "Pfad zur Windows 11 Enterprise ISO (bereits mit NTLite optimiert)",
+        "WinImageIsoPath": "D:\\temp\\Win11_Ent_hard.iso",
+
+        "_comment_OutputPath": "Lokaler Ausgabepfad für das fertige OPSI-Netboot-Paket",
+        "OutputPath": "C:\\PSC_WinPE_Output",
+
+        "_comment_WorkingPath": "Temporäres Arbeitsverzeichnis für den Build-Prozess (mind. 5 GB frei)",
+        "WorkingPath": "C:\\Temp",
+
+        "_comment_CachePath": "Cache für ISO-Extraktion (beschleunigt Wiederholungsbuilds)",
+        "CachePath": "C:\\temp_winPE",
+
+        "_comment_DriverSource": "Ordner mit .inf-Treibern für WinPE-Injektion",
+        "DriverSource": "D:\\temp\\WinPE\\driver",
+
+        "_comment_ToolsSource": "Ordner mit portablen Tools (NPP, Explorer++, Sysinternals etc.)",
+        "ToolsSource": "D:\\temp\\WinPE\\APPS",
+
+        "Architecture": "amd64",
+        "ADK_Path": "",
+        "UseCache": true
+    },
+
+    "Product": {
+        "ProductId": "win11-x64",
+        "ProductName": "Windows 11 LTSC Enterprise",
+        "ProductVersion": "24H2",
+        "ImageIndex": 1
+    },
+
+    "Windows": {
+        "_comment_ProductKey": "KMS-Key für Windows 11 Enterprise LTSC 2024",
+        "ProductKey": "M7XTQ-FN8P6-TTKYV-9D4CC-J462D",
+
+        "_comment_AdminPassword": "Initiales Admin-Passwort (wird bei OPSI-Deployment gesetzt)",
+        "AdminPassword": "nt123!",
+        "AdminUser": "admin",
+        "ComputerName": "*",
+        "Locale": "de-DE",
+        "TimeZone": "W. Europe Standard Time"
+    },
+
+    "OPSI": {
+        "ServerAddress": "sopsi",
+        "ServerUser": "adminuser",
+        "ServerPassword": "Ng2times4ever?",
+
+        "_comment_DepotBasePath": "Linux-Pfad auf dem OPSI-Server",
+        "DepotBasePath": "/var/lib/opsi/depot",
+
+        "_comment_DepotSharePath": "Windows-UNC oder Laufwerksbuchstabe zum OPSI-Depot",
+        "DepotSharePath": "Y:\\",
+
+        "ImageName": ""
+    },
+
+    "Deployment": {
+        "InstallTo": "disk",
+        "AskBeforeInstall": false,
+        "HardwareCheck": false,
+        "BypassTPMCheck": true,
+        "BypassCPUCheck": true,
+        "BypassRAMCheck": true
+    },
+
+    "Hardening": {
+        "_comment": "Steuerung des Hardening-Verhaltens",
+        "EnableDefender": false,
+        "DisableStore": true,
+        "EnableLSAProtection": true,
+        "EnableCredentialGuard": false,
+        "SkipDriverInstall": false,
+        "DriversPath": "C:\\Drivers_Temp"
+    },
+
+    "Meta": {
+        "LastRun": "",
+        "LastRunBy": "",
+        "ScriptVersion": "3.0.0"
+    }
+}

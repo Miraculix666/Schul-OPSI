@@ -1,0 +1,28 @@
+[Actions]
+requiredWinstVersion >= "4.11.2"
+DefVar $LogDir$
+DefVar $ExitCode$
+DefVar $EnableDefender$
+DefVar $DriversPath$
+DefVar $SkipRemote$
+
+; Properties auslesen
+Set $EnableDefender$ = GetProductProperty("enable_defender", "false")
+Set $DriversPath$ = GetProductProperty("drivers_path", "C:\Drivers_Temp")
+Set $SkipRemote$ = GetProductProperty("skip_remote_setup", "false")
+
+Message "Starte Windows 11 Hardening Suite V10.0..."
+
+; Aufruf des PowerShell Skripts (KORREKTER Dateiname!)
+Winbatch_Apply_Harden
+
+Set $ExitCode$ = getLastExitCode
+if ($ExitCode$ = "0")
+comment "Haertung erfolgreich abgeschlossen."
+else
+LogError "Fehler waehrend der Haertung. ExitCode: " + $ExitCode$
+isFatalError
+endif
+
+[Winbatch_Apply_Harden]
+powershell.exe -ExecutionPolicy Bypass -File "%ScriptPath%\Apply_Hardening.ps1" -SilentMode -EnableDefender:$EnableDefender$ -DriversPathSource "$DriversPath$" -SkipRemoteSetup:$SkipRemote$

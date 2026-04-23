@@ -1,1 +1,1 @@
-{ "name": "schul-opsi", "version": "1.0.0", "description": "OPSI deployment scripts" }
+{ "name": "schul-opsi", "version": "2.0.0", "description": "OPSI deployment framework for hardened Windows 11 Enterprise environments" }
