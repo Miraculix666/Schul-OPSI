@@ -319,7 +319,7 @@ function Invoke-UISetup {
         @{ Path = "HKCU:\SOFTWARE\Microsoft\Input\TIPC"; Name = 'Enabled'; Value = 0; Desc = 'Eingabe-Telemetrie aus' },
         @{ Path = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"; Name = 'BingSearchEnabled'; Value = 0; Desc = 'Bing-Suche aus' },
         @{ Path = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager"; Name = 'SilentInstalledAppsEnabled'; Value = 0; Desc = 'Vorgeschlagene Apps aus' }
-    ) | ForEach-Object { Set-RegValue -Path $_.Path -Name $_.Name -Value $_.Value -Type ($_.Type ?? "DWord") -Desc $_.Desc }
+    ) | ForEach-Object { Set-RegValue -Path $_.Path -Name $_.Name -Value $_.Value -Type $(if ($_.Type) { $_.Type } else { "DWord" }) -Desc $_.Desc }
 
     # Windows Terminal als Standard
     Set-RegValue -Path "HKCU:\Console\%%Startup" -Name "DelegationTerminal" -Value "{E12CFF52-A866-4C77-9A90-F570A7AA2C6B}" -Type "String" -Desc "Windows Terminal Standard"
