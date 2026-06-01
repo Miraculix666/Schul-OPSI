@@ -973,7 +973,7 @@ function Invoke-DNSBlocklist {
                         $blockEntries += "0.0.0.0 $domain"
                     }
                 }
-            } catch { Write-LogEntry "Fehler beim Laden von $url: $($_.Exception.Message)" "WARNING" }
+            } catch { Write-LogEntry "Fehler beim Laden von $($url): $($_.Exception.Message)" "WARNING" }
         }
         
         # Speichere offline-Kopie, falls Online erfolgreich
@@ -1084,7 +1084,7 @@ function Export-RegistryHardening {
         $settings = $state.Modules.$mod.Settings
         if ($settings) {
             $regContent += "; =======================================`r`n"
-            $regContent += "; MODUL $mod: $($Script:ModuleDefinitions[$mod].Name)`r`n"
+            $regContent += "; MODUL $($mod): $($Script:ModuleDefinitions[$mod].Name)`r`n"
             $regContent += "; =======================================`r`n"
             
             # Gruppiere nach Registry-Pfad
