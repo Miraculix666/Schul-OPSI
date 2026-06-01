@@ -52,7 +52,7 @@ ask_for_confirmation() {
 
 # --- Main Logic Functions ---
 
-# 1. Fix the TERM environment variable
+# 1. Configure the TERM environment variable
 fix_term_variable() {
     print_message "blue" "Schritt 1: Überprüfung der TERM-Umgebungsvariable..."
     
@@ -83,7 +83,7 @@ fix_term_variable() {
     fi
 }
 
-# 2. Fix the .inputrc file
+# 2. Configure the .inputrc file
 fix_inputrc_file() {
     print_message "blue" "Schritt 2: Überprüfung der Tastenbelegungs-Datei (~/.inputrc)..."
     local inputrc_file="$HOME/.inputrc"
