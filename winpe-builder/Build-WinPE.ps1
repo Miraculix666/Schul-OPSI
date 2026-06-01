@@ -1109,6 +1109,8 @@ function Invoke-Cleanup {
 # HAUPTPROGRAMM
 # ============================================================================
 
+if ($MyInvocation.InvocationName -ne '.') {
+
 Show-Banner
 
 # 0. Auto-Elevation
@@ -1233,4 +1235,6 @@ finally {
     Write-Host ""
     Read-Host "  [Enter] druecken zum Beenden..."
     exit 0
+}
+
 }
