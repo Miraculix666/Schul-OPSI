@@ -913,8 +913,18 @@ function Invoke-DriverInjection {
         # FTS Besonderheit: PD/BD PROCHOT Bug Cleanup vor Treiber-Installation (an FTS_Update_and_PD_Error angelehnt)
         if ($isFTS -and $folder.Name -match "Firmware|Intel") {
             Write-LogEntry "FTS Cleanup: Loesche alte Intel/UCSI Treiberreste..." "INFO"
-            # Beispielhaftes Cleanup: pnputil /delete-driver oem*.inf /uninstall (vereinfacht)
-            # In der Praxis gezielt nach bestimmten HWIDs suchen
+            $problemHWIDs = @("ACPI\\USBC000", "ACPI\\INT3400")
+            foreach ($hwid in $problemHWIDs) {
+                # Finde oem*.inf Dateien fuer die problematischen HWIDs
+                $drivers = Get-CimInstance -ClassName Win32_PnPSignedDriver | Where-Object {
+                    $_.HardwareID -match $hwid -and $_.InfName -like "oem*.inf"
+                }
+                foreach ($driver in $drivers) {
+                    Write-LogEntry "FTS Cleanup: Entferne Treiber $($driver.InfName) fuer $hwid" "INFO"
+                    $pnpArgs = "/delete-driver `"$($driver.InfName)`" /uninstall /force"
+                    Start-Process -FilePath "pnputil.exe" -ArgumentList $pnpArgs -Wait -NoNewWindow
+                }
+            }
         }
 
         # Rekursive Installation via pnputil
