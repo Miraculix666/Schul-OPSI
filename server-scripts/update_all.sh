@@ -166,7 +166,7 @@ step_client_trigger() {
   else
     msg_warn "Globaler Task fehlgeschlagen. Versuche Fallback-Methode..."
     # Fallback für ältere Backends oder Teil-Sync
-    for client in $(opsi-admin -S method host_getIdents '{"type":"OpsiClient"}' | tr -d '[]," '); do if [ -n "$client" ]; then opsi-admin -S method setProductActionRequest "opsi-client-agent" "$client" "setup" &>/dev/null; fi; done
+    for client in $(opsi-admin -S method host_getIdents '{"type":"OpsiClient"}' | tr -d '[]," '); do if [ -n "$client" ]; then echo "$client"; fi; done | xargs -r -I {} -P 20 opsi-admin -S method setProductActionRequest "opsi-client-agent" "{}" "setup" &>/dev/null
     msg_ok "Flags via Fallback-Methode gesetzt."
   fi
 
