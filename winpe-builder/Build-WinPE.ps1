@@ -106,10 +106,19 @@ function Show-Banner {
 # 0. AUTO-ELEVATION
 # ============================================================================
 
-function Invoke-SelfElevation {
-    $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
+function Test-IsAdministrator {
+    return ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
         [Security.Principal.WindowsBuiltInRole]::Administrator
     )
+}
+
+function Exit-Script {
+    param([int]$ExitCode = 0)
+    exit $ExitCode
+}
+
+function Invoke-SelfElevation {
+    $isAdmin = Test-IsAdministrator
     if ($isAdmin) {
         Write-OK "Administrator-Rechte bestaetigt"
         return
@@ -131,7 +140,7 @@ function Invoke-SelfElevation {
 
     try {
         Start-Process powershell -ArgumentList ($argList -join " ") -Verb RunAs -Wait
-        exit 0
+        Exit-Script 0
     }
     catch {
         Write-Err "Elevation fehlgeschlagen: $_"
@@ -139,7 +148,7 @@ function Invoke-SelfElevation {
         Write-Host "  Bitte manuell als Administrator starten:" -ForegroundColor Yellow
         Write-Host "  Win+X -> Terminal (Admin)" -ForegroundColor Gray
         Read-Host "  [Enter] zum Beenden..."
-        exit 1
+        Exit-Script 1
     }
 }
 
