@@ -215,10 +215,10 @@ else
     log_warn "[DRY-RUN] Hätte $TEMP_MOUNT_PATH erstellt und $PARTITION_NAME dort gemountet."
 fi
 
-RSYNC_CMD="rsync -a --info=progress2 --remove-source-files"
+RSYNC_CMD=(rsync -a --info=progress2 --remove-source-files)
 if [ $USE_CHECKSUM -eq 1 ]; then
     log_info "Verwende rsync mit CHECKSUM-Verifizierung (langsamer, aber gründlicher)."
-    RSYNC_CMD+=" --checksum"
+    RSYNC_CMD+=(--checksum)
 else
     log_info "Verwende rsync mit Standard Zeit/Größen-Prüfung (schneller)."
 fi
@@ -228,7 +228,7 @@ find "$OPSI_DEPOT_PATH" -mindepth 1 -maxdepth 1 -print0 | while IFS= read -r -d 
     item_name=$(basename "$item")
     log_info "--> Verschiebe: $item_name"
     if [ $DRY_RUN -eq 0 ]; then
-        eval "$RSYNC_CMD \"\$item\" \"\$TEMP_MOUNT_PATH/\""
+        "${RSYNC_CMD[@]}" "$item" "$TEMP_MOUNT_PATH/"
         log_info "    Verifizierung für $item_name erfolgreich."
         log_info "    Führe Deduplizierung für $TEMP_MOUNT_PATH/$item_name aus..."
         duperemove -hdr --hashfile=/tmp/opsi_dedup.hash "$TEMP_MOUNT_PATH/$item_name"
