@@ -536,7 +536,7 @@ function Initialize-Workspace {
     $copypeLogOut = Join-Path $script:ScriptDir "copype_stdout.log"
     $copypeLogErr = Join-Path $script:ScriptDir "copype_stderr.log"
     
-    # cmd.exe Argument Parser Fix:
+    # cmd.exe Argument Parser Workaround:
     # We must wrap the ENTIRE argument block in quotes to prevent cmd.exe from stripping inner quotes.
     $argList = "/c `"`"$($ADK.CopypePath)`" $Arch `"$WorkDir`"`""
     $proc = Start-Process -FilePath "cmd.exe" -ArgumentList $argList -Wait -NoNewWindow -PassThru -RedirectStandardOutput $copypeLogOut -RedirectStandardError $copypeLogErr
