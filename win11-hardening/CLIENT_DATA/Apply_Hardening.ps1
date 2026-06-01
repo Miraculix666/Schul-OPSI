@@ -1173,7 +1173,7 @@ function Export-AutounattendXML {
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
                     <Order>2</Order>
-                    <CommandLine>PowerShell -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Miraculix666/Schul-OPSI/main/win11-hardening/CLIENT_DATA/Apply_Hardening.ps1' -OutFile 'C:\Apply_Hardening.ps1'; &amp; 'C:\Apply_Hardening.ps1' -SilentMode -ExportReg"</CommandLine>
+                    <CommandLine>PowerShell -ExecutionPolicy Bypass -Command "&amp; 'C:\Apply_Hardening.ps1' -SilentMode -ExportReg"</CommandLine>
                     <Description>Run Hardening V11.0</Description>
                 </SynchronousCommand>
             </FirstLogonCommands>
