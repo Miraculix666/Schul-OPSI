@@ -50,7 +50,8 @@
     "OPSI": {
         "ServerAddress": "sopsi",
         "ServerUser": "adminuser",
-        "ServerPassword": "Ng2times4ever?",
+        "_comment_ServerPassword": "OPSI-Server Passwort (über Umgebungsvariable oder Secret Store beziehen)",
+        "ServerPassword": "",
 
         "_comment_DepotBasePath": "Linux-Pfad auf dem OPSI-Server",
         "DepotBasePath": "/var/lib/opsi/depot",
