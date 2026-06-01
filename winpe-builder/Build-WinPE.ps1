@@ -169,7 +169,7 @@ function Read-Environment {
         }
         Windows = @{
             ProductKey     = "M7XTQ-FN8P6-TTKYV-9D4CC-J462D"
-            AdminPassword  = "nt123!"
+            AdminPassword  = ""
             AdminUser      = "admin"
             ComputerName   = "*"
             Locale         = "de-DE"
@@ -425,7 +425,7 @@ function Show-ConfigMenu {
         # --- WINDOWS ---
         Write-Host "  [ WINDOWS SETUP ]" -ForegroundColor Yellow
         Write-Host ("   [K] Product Key        : " + (Show-EnvValue $Env.Windows.ProductKey)) -ForegroundColor White
-        Write-Host ("   [P] Admin-Passwort     : " + $Env.Windows.AdminPassword) -ForegroundColor White
+        Write-Host ("   [P] Admin-Passwort     : " + (Show-EnvValue $Env.Windows.AdminPassword)) -ForegroundColor White
         Write-Host ("   [L] Locale             : " + $Env.Windows.Locale) -ForegroundColor White
         Write-Host ""
 

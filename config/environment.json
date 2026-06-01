@@ -39,8 +39,8 @@
         "_comment_ProductKey": "KMS-Key für Windows 11 Enterprise LTSC 2024",
         "ProductKey": "M7XTQ-FN8P6-TTKYV-9D4CC-J462D",
 
-        "_comment_AdminPassword": "Initiales Admin-Passwort (wird bei OPSI-Deployment gesetzt)",
-        "AdminPassword": "nt123!",
+        "_comment_AdminPassword": "Initiales Admin-Passwort (wird bei OPSI-Deployment gesetzt - NICHT HARDCODEN!)",
+        "AdminPassword": "",
         "AdminUser": "admin",
         "ComputerName": "*",
         "Locale": "de-DE",
@@ -50,7 +50,7 @@
     "OPSI": {
         "ServerAddress": "sopsi",
         "ServerUser": "adminuser",
-        "ServerPassword": "Ng2times4ever?",
+        "ServerPassword": "",
 
         "_comment_DepotBasePath": "Linux-Pfad auf dem OPSI-Server",
         "DepotBasePath": "/var/lib/opsi/depot",
