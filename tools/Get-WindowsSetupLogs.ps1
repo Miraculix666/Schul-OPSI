@@ -138,21 +138,16 @@ function Test-UNCPathAccess {
     if ($Cred) {
         Write-Verbose "Verwende übergebene Credentials für den Zugriff."
         try {
-            # Erfordert die PowerShell Remoting (WinRM) Umgebung
-            $UserName = $Cred.UserName
-            $Password = $Cred.GetNetworkCredential().Password
+            $driveName = [guid]::NewGuid().ToString().Substring(0, 8)
+            Write-Verbose "Führe 'New-PSDrive' aus, um Verbindung herzustellen (Drive: $driveName)..."
             
-            # Verwendung von 'net use' zur temporären Authentifizierung des UNC-Pfades
-            # Dies ist robuster in Umgebungen ohne PS-Remoting
-            $command = "net use `"$Path`" `"$Password`" /user:`"$UserName`" /persistent:no"
-            Write-Verbose "Führe 'net use' aus, um Verbindung herzustellen..."
+            # Verwendung von New-PSDrive zur temporären Authentifizierung des UNC-Pfades
+            $null = New-PSDrive -Name $driveName -PSProvider FileSystem -Root $Path -Credential $Cred -ErrorAction Stop
             
-            $netUseResult = Invoke-Expression $command 2>&1
+            # Die SMB-Sitzung bleibt auch nach dem Entfernen des Laufwerks oft aktiv,
+            # aber wir räumen das PS-Laufwerk sofort wieder auf
+            $null = Remove-PSDrive -Name $driveName -Force -ErrorAction SilentlyContinue
             
-            if ($LASTEXITCODE -ne 0) {
-                 Write-Verbose "net use fehlgeschlagen (ExitCode $LASTEXITCODE). Ergebnis: $($netUseResult | Out-String)"
-                 return $false
-            }
             Write-Verbose "Netzwerkverbindung temporär erfolgreich hergestellt."
             return $true
         } catch {
