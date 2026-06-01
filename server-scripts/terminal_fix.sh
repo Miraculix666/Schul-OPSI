@@ -25,7 +25,6 @@ read -r -d '' INPUTRC_CONFIG <<'EOF'
 "\e[5~": history-search-backward
 "\e[6~": history-search-forward
 
-# Enable bracketed paste mode to fix pasting issues
 set enable-bracketed-paste on
 EOF
 
