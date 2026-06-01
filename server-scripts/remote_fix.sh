@@ -1,5 +1,4 @@
 ﻿#!/bin/bash
-# Fix Office Description using Python instead of jq to ensure it works
 python3 -c "
 import json, subprocess
 try:
