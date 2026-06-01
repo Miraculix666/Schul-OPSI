@@ -97,7 +97,7 @@
                 <LocalAccounts>
                     <LocalAccount wcm:action="add">
                         <Password>
-                            <Value>MQAyADMANAA1AFAAYQBzAHMAdwBvAHIAZAA=</Value>
+                            <Value></Value>
                             <PlainText>false</PlainText>
                         </Password>
                         <Name>FirstAdmin</Name>
@@ -112,7 +112,7 @@
                 <LogonCount>1</LogonCount>
                 <Username>FirstAdmin</Username>
                 <Password>
-                    <Value>MQAyADMANAA1AFAAYQBzAHMAdwBvAHIAZAA=</Value>
+                    <Value></Value>
                     <PlainText>false</PlainText>
                 </Password>
             </AutoLogon>

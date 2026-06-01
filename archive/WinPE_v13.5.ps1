@@ -193,11 +193,11 @@ systemctl restart opsiconfd
                 <Enabled>true</Enabled>
                 <LogonCount>2</LogonCount>
                 <Username>admin</Username>
-                <Password><Value>bgB0ADEAMgAzACEA</Value><PlainText>false</PlainText></Password>
+                <Password><Value></Value><PlainText>false</PlainText></Password>
             </AutoLogon>
             <UserAccounts>
                 <LocalAccount wcm:action="add">
-                    <Password><Value>bgB0ADEAMgAzACEA</Value><PlainText>false</PlainText></Password>
+                    <Password><Value></Value><PlainText>false</PlainText></Password>
                     <Name>admin</Name>
                     <Group>Administrators</Group>
                 </LocalAccount>

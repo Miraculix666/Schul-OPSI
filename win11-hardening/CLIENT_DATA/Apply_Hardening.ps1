@@ -90,7 +90,6 @@ $Script:TaskXMLPath        = Join-Path $PSScriptRoot "User_Harden_Task.xml"
 # --- Autounattend Passwort (Base64-kodiert) ---
 # WICHTIG: Vor Produktiveinsatz aendern!
 # Format: Unicode-String Base64-kodiert (Windows Unattend Standard)
-# Beispiel "nt123!" = "bgB0ADEAMgAzACEA" | Beispiel "P@ssw0rd" = "UABAAHMAcwB3ADAAcgBkAA=="
 $Script:UnattendPassword   = "__CHANGE_ME__"
 $Script:UnattendUser       = "FirstAdmin"
 $Script:UnattendOrg        = "IT-Abteilung"
