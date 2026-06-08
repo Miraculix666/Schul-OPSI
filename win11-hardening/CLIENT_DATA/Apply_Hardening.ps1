@@ -1123,18 +1123,8 @@ function Export-RegistryHardening {
     Write-LogEntry "Registry-Export erstellt." "SUCCESS"
 }
 
-function Export-AutounattendXML {
-    $usbXmlPath = Join-Path $Script:StateDir "Autounattend_USB.xml"
-    $opsiXmlPath = Join-Path $Script:StateDir "Autounattend_OPSI.xml"
-    
-    Write-LogEntry "Generiere Autounattend.xml Dateien..." "INFO"
-    
-    $xmlTemplate = @"
-<?xml version="1.0" encoding="utf-8"?>
-<unattend xmlns="urn:schemas-microsoft-com:unattend">
-    <!-- Generiert durch Windows Hardening Suite V11.0 -->
-    <settings pass="oobeSystem">
-        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+function Get-OobeSettingsXml {
+    return @"
             <OOBE>
                 <HideEULAPage>true</HideEULAPage>
                 <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
@@ -1145,6 +1135,11 @@ function Export-AutounattendXML {
                 <SkipUserOOBE>true</SkipUserOOBE>
                 <SkipMachineOOBE>true</SkipMachineOOBE>
             </OOBE>
+"@
+}
+
+function Get-UserAccountsXml {
+    return @"
             <UserAccounts>
                 <AdministratorPassword>
                     <Value>$Script:UnattendPassword</Value>
@@ -1163,8 +1158,11 @@ function Export-AutounattendXML {
                     </LocalAccount>
                 </LocalAccounts>
             </UserAccounts>
-            <RegisteredOrganization>$Script:UnattendOrg</RegisteredOrganization>
-            <RegisteredOwner>$Script:UnattendUser</RegisteredOwner>
+"@
+}
+
+function Get-FirstLogonCommandsXml {
+    return @"
             <FirstLogonCommands>
                 <SynchronousCommand wcm:action="add">
                     <Order>1</Order>
@@ -1177,6 +1175,30 @@ function Export-AutounattendXML {
                     <Description>Run Hardening V11.0</Description>
                 </SynchronousCommand>
             </FirstLogonCommands>
+"@
+}
+
+function Export-AutounattendXML {
+    $usbXmlPath = Join-Path $Script:StateDir "Autounattend_USB.xml"
+    $opsiXmlPath = Join-Path $Script:StateDir "Autounattend_OPSI.xml"
+
+    Write-LogEntry "Generiere Autounattend.xml Dateien..." "INFO"
+
+    $oobeXml = Get-OobeSettingsXml
+    $accountsXml = Get-UserAccountsXml
+    $logonCommandsXml = Get-FirstLogonCommandsXml
+
+    $xmlTemplate = @"
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend">
+    <!-- Generiert durch Windows Hardening Suite V11.0 -->
+    <settings pass="oobeSystem">
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+$oobeXml
+$accountsXml
+            <RegisteredOrganization>$Script:UnattendOrg</RegisteredOrganization>
+            <RegisteredOwner>$Script:UnattendUser</RegisteredOwner>
+$logonCommandsXml
         </component>
     </settings>
 </unattend>
@@ -1186,7 +1208,7 @@ function Export-AutounattendXML {
     $xmlTemplate | Set-Content -Path $usbXmlPath -Encoding UTF8
     
     # OPSI Variante (ggf. leicht abgewandelt ohne FirstLogonCommands, da OPSI das übernimmt)
-    $xmlOpsi = $xmlTemplate -replace "<FirstLogonCommands>.*?</FirstLogonCommands>", "<!-- FirstLogonCommands via OPSI Winst -->"
+    $xmlOpsi = $xmlTemplate -replace "(?s)<FirstLogonCommands>.*?</FirstLogonCommands>", "<!-- FirstLogonCommands via OPSI Winst -->"
     $xmlOpsi | Set-Content -Path $opsiXmlPath -Encoding UTF8
     
     Write-LogEntry "Autounattend_USB.xml und Autounattend_OPSI.xml in $Script:StateDir erstellt." "SUCCESS"
