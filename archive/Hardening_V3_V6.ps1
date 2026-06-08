@@ -401,9 +401,10 @@ if ($PSCmdlet.ShouldProcess("System", "Systemweite Härtung anwenden")) {
         "*ZuneVideo*"  # Filme & TV
     )
     # Entferne Provisioned Packages (für neue Benutzer)
+    $cachedProv = Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
     foreach ($PackagePattern in $PackagesToRemove) {
         try {
-            Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -like $PackagePattern } | ForEach-Object {
+            $cachedProv | Where-Object { $_.DisplayName -like $PackagePattern } | ForEach-Object {
                 Write-LogEntry -Message "INFO (AppX): Entferne Provisioned Package '$($_.DisplayName)'..." -Type "INFO"
                 Remove-AppxProvisionedPackage -Online -PackageName $_.PackageName -ErrorAction Stop
                 Write-LogEntry -Message "Erfolg (AppX): Provisioned Package '$($_.DisplayName)' entfernt."
@@ -413,9 +414,10 @@ if ($PSCmdlet.ShouldProcess("System", "Systemweite Härtung anwenden")) {
         }
     }
      # Entferne installierte Pakete für den aktuellen Benutzer (SYSTEM) - oft nicht nötig, aber zur Sicherheit
+    $cachedInst = Get-AppxPackage -AllUsers -ErrorAction SilentlyContinue
     foreach ($PackagePattern in $PackagesToRemove) {
         try {
-            Get-AppxPackage -AllUsers -Name $PackagePattern -ErrorAction SilentlyContinue | ForEach-Object {
+            $cachedInst | Where-Object { $_.Name -like $PackagePattern } | ForEach-Object {
                  Write-LogEntry -Message "INFO (AppX): Entferne installiertes Package '$($_.Name)'..." -Type "INFO"
                 Remove-AppxPackage -Package $_.PackageFullName -AllUsers -ErrorAction Stop
                  Write-LogEntry -Message "Erfolg (AppX): Installiertes Package '$($_.Name)' entfernt."
