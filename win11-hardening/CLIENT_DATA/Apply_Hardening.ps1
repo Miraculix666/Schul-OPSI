@@ -65,7 +65,10 @@ param(
     [switch]$ShowStatus           = $false,
     [switch]$UpdateDNSBlocklist   = $false,
     [ValidateSet("Disable","Remove")]
-    [string]$DebloatAction        = "Remove"
+    [string]$DebloatAction        = "Remove",
+    [SecureString]$UnattendPassword,
+    [string]$UnattendUser         = "FirstAdmin",
+    [string]$UnattendOrg          = "IT-Abteilung"
 )
 
 #Requires -RunAsAdministrator
@@ -86,14 +89,6 @@ $Script:HostsBackup        = Join-Path $Script:StateDir "hosts.backup"
 $Script:DNSWhitelistFile   = Join-Path $Script:StateDir "dns_whitelist.txt"
 $Script:DNSOfflineFile     = Join-Path $PSScriptRoot "dns_blocklist.txt"
 $Script:TaskXMLPath        = Join-Path $PSScriptRoot "User_Harden_Task.xml"
-
-# --- Autounattend Passwort (Base64-kodiert) ---
-# WICHTIG: Vor Produktiveinsatz aendern!
-# Format: Unicode-String Base64-kodiert (Windows Unattend Standard)
-# Beispiel "nt123!" = "bgB0ADEAMgAzACEA" | Beispiel "P@ssw0rd" = "UABAAHMAcwB3ADAAcgBkAA=="
-$Script:UnattendPassword   = "__CHANGE_ME__"
-$Script:UnattendUser       = "FirstAdmin"
-$Script:UnattendOrg        = "IT-Abteilung"
 
 # --- DNS Sperrlisten-Quellen (Pi-hole Stil, Hagezi/BSI) ---
 $Script:DNSBlocklistURLs   = @(
@@ -1129,6 +1124,24 @@ function Export-AutounattendXML {
     
     Write-LogEntry "Generiere Autounattend.xml Dateien..." "INFO"
     
+    if ($null -eq $UnattendPassword) {
+        if (-not $SilentMode) {
+            $UnattendPassword = Read-Host "Bitte Unattend Passwort eingeben" -AsSecureString
+        } else {
+            Write-LogEntry "Export-AutounattendXML: -UnattendPassword fehlt im Silent-Mode!" "ERROR"
+            return
+        }
+    }
+
+    $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($UnattendPassword)
+    try {
+        $plain = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
+        $bytes = [System.Text.Encoding]::Unicode.GetBytes($plain)
+        $base64Password = [Convert]::ToBase64String($bytes)
+    } finally {
+        [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
+    }
+
     $xmlTemplate = @"
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
@@ -1147,24 +1160,24 @@ function Export-AutounattendXML {
             </OOBE>
             <UserAccounts>
                 <AdministratorPassword>
-                    <Value>$Script:UnattendPassword</Value>
+                    <Value>$base64Password</Value>
                     <PlainText>false</PlainText>
                 </AdministratorPassword>
                 <LocalAccounts>
                     <LocalAccount wcm:action="add">
                         <Password>
-                            <Value>$Script:UnattendPassword</Value>
+                            <Value>$base64Password</Value>
                             <PlainText>false</PlainText>
                         </Password>
                         <Description>Local Admin</Description>
-                        <DisplayName>$Script:UnattendUser</DisplayName>
+                        <DisplayName>$UnattendUser</DisplayName>
                         <Group>Administrators</Group>
-                        <Name>$Script:UnattendUser</Name>
+                        <Name>$UnattendUser</Name>
                     </LocalAccount>
                 </LocalAccounts>
             </UserAccounts>
-            <RegisteredOrganization>$Script:UnattendOrg</RegisteredOrganization>
-            <RegisteredOwner>$Script:UnattendUser</RegisteredOwner>
+            <RegisteredOrganization>$UnattendOrg</RegisteredOrganization>
+            <RegisteredOwner>$UnattendUser</RegisteredOwner>
             <FirstLogonCommands>
                 <SynchronousCommand wcm:action="add">
                     <Order>1</Order>
