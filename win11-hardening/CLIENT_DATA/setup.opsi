@@ -5,11 +5,20 @@ DefVar $ExitCode$
 DefVar $EnableDefender$
 DefVar $DriversPath$
 DefVar $SkipRemote$
+DefVar $PSArgs$
 
 ; Properties auslesen
 Set $EnableDefender$ = GetProductProperty("enable_defender", "false")
 Set $DriversPath$ = GetProductProperty("drivers_path", "C:\Drivers_Temp")
 Set $SkipRemote$ = GetProductProperty("skip_remote_setup", "false")
+
+Set $PSArgs$ = '-SilentMode -DriversPathSource "' + $DriversPath$ + '"'
+if ($EnableDefender$ = "true")
+	Set $PSArgs$ = $PSArgs$ + " -EnableDefender"
+endif
+if ($SkipRemote$ = "true")
+	Set $PSArgs$ = $PSArgs$ + " -SkipRemoteSetup"
+endif
 
 Message "Starte Windows 11 Hardening Suite V10.0..."
 
@@ -25,4 +34,4 @@ isFatalError
 endif
 
 [Winbatch_Apply_Harden]
-powershell.exe -ExecutionPolicy Bypass -File "%ScriptPath%\Apply_Hardening.ps1" -SilentMode -EnableDefender:$EnableDefender$ -DriversPathSource "$DriversPath$" -SkipRemoteSetup:$SkipRemote$
+powershell.exe -ExecutionPolicy Bypass -File "%ScriptPath%\Apply_Hardening.ps1" $PSArgs$
