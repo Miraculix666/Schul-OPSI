@@ -33,6 +33,8 @@ cat > /etc/systemd/system/redis-server.service.d/timeout.conf << 'EOF'
 TimeoutStartSec=30
 TimeoutStopSec=30
 # Deaktiviere problematische systemd notify flags
+Type=simple
+RuntimeDirectory=redis
 EOF
 
 # ====================================================
