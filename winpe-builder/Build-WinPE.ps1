@@ -106,10 +106,19 @@ function Show-Banner {
 # 0. AUTO-ELEVATION
 # ============================================================================
 
-function Invoke-SelfElevation {
-    $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
+function Test-IsAdministrator {
+    return ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
         [Security.Principal.WindowsBuiltInRole]::Administrator
     )
+}
+
+function Exit-Script {
+    param([int]$ExitCode)
+    exit $ExitCode
+}
+
+function Invoke-SelfElevation {
+    $isAdmin = Test-IsAdministrator
     if ($isAdmin) {
         Write-OK "Administrator-Rechte bestaetigt"
         return
@@ -131,7 +140,7 @@ function Invoke-SelfElevation {
 
     try {
         Start-Process powershell -ArgumentList ($argList -join " ") -Verb RunAs -Wait
-        exit 0
+        Exit-Script 0
     }
     catch {
         Write-Err "Elevation fehlgeschlagen: $_"
@@ -139,7 +148,7 @@ function Invoke-SelfElevation {
         Write-Host "  Bitte manuell als Administrator starten:" -ForegroundColor Yellow
         Write-Host "  Win+X -> Terminal (Admin)" -ForegroundColor Gray
         Read-Host "  [Enter] zum Beenden..."
-        exit 1
+        Exit-Script 1
     }
 }
 
@@ -1109,15 +1118,16 @@ function Invoke-Cleanup {
 # HAUPTPROGRAMM
 # ============================================================================
 
-Show-Banner
+if ($MyInvocation.InvocationName -ne '.') {
+    Show-Banner
 
-# 0. Auto-Elevation
-Invoke-SelfElevation
+    # 0. Auto-Elevation
+    Invoke-SelfElevation
 
-# Merke -Env Switch (wird von Read-Environment ueberschrieben)
-$Env_Switch = $Env.IsPresent
+    # Merke -Env Switch (wird von Read-Environment ueberschrieben)
+    $Env_Switch = $Env.IsPresent
 
-try {
+    try {
     # 1. Environment laden
     $Env = Read-Environment
 
@@ -1213,24 +1223,25 @@ try {
     }
     Write-Host ("  Ausgabe: " + $Env.Build.OutputPath) -ForegroundColor Gray
     Write-Host ("  Log:     " + $script:LogFile) -ForegroundColor Gray
-    Write-Host ""
-}
-catch {
-    Write-Host ""
-    Write-Host "  ================================================================" -ForegroundColor Red
-    Write-Host "     KRITISCHER FEHLER" -ForegroundColor Red
-    Write-Host "  ================================================================" -ForegroundColor Red
-    Write-Host ("  " + $_.Exception.Message) -ForegroundColor Red
-    if ($_.ScriptStackTrace) {
-        Write-Host ("  " + $_.ScriptStackTrace) -ForegroundColor DarkGray
+        Write-Host ""
     }
-    Invoke-Cleanup
-    Write-Host ""
-    if ($script:LogFile) { Write-Host ("  Log: " + $script:LogFile) -ForegroundColor Gray }
-}
-finally {
-    Invoke-Cleanup
-    Write-Host ""
-    Read-Host "  [Enter] druecken zum Beenden..."
-    exit 0
+    catch {
+        Write-Host ""
+        Write-Host "  ================================================================" -ForegroundColor Red
+        Write-Host "     KRITISCHER FEHLER" -ForegroundColor Red
+        Write-Host "  ================================================================" -ForegroundColor Red
+        Write-Host ("  " + $_.Exception.Message) -ForegroundColor Red
+        if ($_.ScriptStackTrace) {
+            Write-Host ("  " + $_.ScriptStackTrace) -ForegroundColor DarkGray
+        }
+        Invoke-Cleanup
+        Write-Host ""
+        if ($script:LogFile) { Write-Host ("  Log: " + $script:LogFile) -ForegroundColor Gray }
+    }
+    finally {
+        Invoke-Cleanup
+        Write-Host ""
+        Read-Host "  [Enter] druecken zum Beenden..."
+        Exit-Script 0
+    }
 }
