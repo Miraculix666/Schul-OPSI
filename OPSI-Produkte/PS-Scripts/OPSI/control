@@ -1,0 +1,36 @@
+[Package]
+version: 1.0
+Increment: 1
+
+[Product]
+type: localboot
+id: ps-scripts
+name: PowerShell Script Runner
+description: Fuehrt ein oder mehrere PowerShell-Skripte auf dem Client aus.
+advice: Ermoeglicht die Ausfuehrung von benutzerdefinierten PS-Skripten mit anpassbaren Rechten.
+version: 1.0
+priority: 50
+licenseRequired: false
+setupScript: setup.opsi
+
+[ProductProperty]
+name: execution_policy
+description: PowerShell-ExecutionPolicy fuer die Ausfuehrung (Bypass wird empfohlen)
+default: Bypass
+values: ["Bypass", "RemoteSigned", "Unrestricted", "AllSigned", "Restricted"]
+
+[ProductProperty]
+name: silent
+description: Sollen die Skripte unsichtbar/silent ausgefuehrt werden?
+default: true
+values: ["true", "false"]
+
+[ProductProperty]
+name: script_filter
+description: Filter fuer auszufuehrende Skripte im 'scripts'-Ordner (z.B. '*.ps1' fuer alle oder ein bestimmter Dateiname)
+default: *.ps1
+
+[ProductProperty]
+name: script_parameters
+description: Parameter, die an die PowerShell-Skripte uebergeben werden sollen (z.B. -Parameter1 Wert1 -Flag)
+default: 

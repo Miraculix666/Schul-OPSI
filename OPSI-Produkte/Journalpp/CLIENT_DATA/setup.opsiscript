@@ -1,0 +1,18 @@
+[Actions]
+requiredWinstVersion >= "4.12.0.16"
+DefVar $Installer$
+DefVar $ExitCode$
+Set $Installer$ = "%ScriptPath%\journalpp-setup.exe"
+Message "Installing Journal++ ..."
+Winbatch_install
+Sub_check_exitcode
+
+[Winbatch_install]
+"$Installer$" /S
+
+[Sub_check_exitcode]
+Set $ExitCode$ = getLastExitCode
+if not ($ExitCode$ = "0")
+    LogError "Setup failed with exit code " + $ExitCode$
+    isFatalError "Setup failed"
+endif

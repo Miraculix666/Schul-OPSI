@@ -1,0 +1,15 @@
+[Actions]
+DefVar $ExitCode$
+Message "Uninstalling Journal++ ..."
+Winbatch_uninstall
+Sub_check_exitcode
+
+[Winbatch_uninstall]
+"%ProgramFiles%\Journal++\uninstall.exe" /S
+
+[Sub_check_exitcode]
+Set $ExitCode$ = getLastExitCode
+if not ($ExitCode$ = "0")
+    LogError "Uninstall failed: " + $ExitCode$
+    isFatalError "Uninstall failed"
+endif

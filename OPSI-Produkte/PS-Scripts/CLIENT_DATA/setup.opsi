@@ -1,0 +1,41 @@
+[Actions]
+requiredWinstVersion >= "4.11.2"
+
+DefVar $ExecutionPolicy$
+DefVar $Silent$
+DefVar $ScriptFilter$
+DefVar $ScriptParameters$
+DefVar $PSArgs$
+DefVar $ExitCode$
+
+; Properties auslesen
+Set $ExecutionPolicy$    = GetProductProperty("execution_policy", "Bypass")
+Set $Silent$             = GetProductProperty("silent", "true")
+Set $ScriptFilter$       = GetProductProperty("script_filter", "*.ps1")
+Set $ScriptParameters$   = GetProductProperty("script_parameters", "")
+
+; Argumente fuer powershell.exe zusammenbauen
+Set $PSArgs$ = '-NoProfile -ExecutionPolicy Bypass -File "%ScriptPath%\run_wrapper.ps1"'
+Set $PSArgs$ = $PSArgs$ + ' -ExecutionPolicyVal "' + $ExecutionPolicy$ + '"'
+Set $PSArgs$ = $PSArgs$ + ' -SilentVal "' + $Silent$ + '"'
+Set $PSArgs$ = $PSArgs$ + ' -ScriptFilterVal "' + $ScriptFilter$ + '"'
+Set $PSArgs$ = $PSArgs$ + ' -ScriptParametersVal "' + $ScriptParameters$ + '"'
+
+if ($Silent$ = "true")
+	Set $PSArgs$ = '-WindowStyle Hidden -NonInteractive ' + $PSArgs$
+endif
+
+Message "Starte PowerShell Script Runner..."
+
+Winbatch_Run_Scripts
+
+Set $ExitCode$ = getLastExitCode
+if ($ExitCode$ = "0")
+	comment "Ausfuehrung aller PowerShell-Skripte abgeschlossen."
+else
+	LogError "Fehler bei der Ausfuehrung der PowerShell-Skripte. ExitCode: " + $ExitCode$
+	isFatalError
+endif
+
+[Winbatch_Run_Scripts]
+powershell.exe $PSArgs$

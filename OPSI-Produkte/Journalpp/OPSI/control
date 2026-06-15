@@ -1,0 +1,21 @@
+[Package]
+version: 1
+depends:
+
+[Product]
+type: localboot
+id: journalpp
+name: Journal++
+description: Handwriting note-taking software (Journalpp variant)
+advice:
+version: 1.0.0
+priority: 0
+licenseRequired: False
+productClasses:
+setupScript: setup.opsiscript
+uninstallScript: uninstall.opsiscript
+updateScript:
+alwaysScript:
+onceScript:
+customScript:
+userLoginScript:
