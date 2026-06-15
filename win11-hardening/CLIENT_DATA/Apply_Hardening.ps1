@@ -747,8 +747,9 @@ function Invoke-Debloating {
         }
 
         # 2. Installierte Pakete (alle User)
+        $installedPackages = Get-AppxPackage -AllUsers -ErrorAction SilentlyContinue
         foreach ($pattern in $AppList) {
-            Get-AppxPackage -AllUsers -ErrorAction SilentlyContinue | Where-Object { $_.Name -like $pattern } | ForEach-Object {
+            $installedPackages | Where-Object { $_.Name -like $pattern } | ForEach-Object {
                 Remove-AppxPackage -Package $_.PackageFullName -AllUsers -ErrorAction SilentlyContinue | Out-Null
                 Write-LogEntry "AppX entfernt: $($_.Name)" "INFO"
             }
@@ -763,8 +764,9 @@ function Invoke-Debloating {
             }
     } else {
         # --- Nur Deaktivieren (wiederherstellbar) ---
+        $installedPackagesDeactivate = Get-AppxPackage -AllUsers -ErrorAction SilentlyContinue
         foreach ($pattern in $AppList) {
-            Get-AppxPackage -AllUsers -ErrorAction SilentlyContinue | Where-Object { $_.Name -like $pattern } | ForEach-Object {
+            $installedPackagesDeactivate | Where-Object { $_.Name -like $pattern } | ForEach-Object {
                 # NonRemovable-Apps koennen nicht entfernt, aber deaktiviert werden
                 try {
                     Get-AppxPackage -Name $_.Name -AllUsers | Remove-AppxPackage -ErrorAction SilentlyContinue | Out-Null
