@@ -1,8 +1,8 @@
-<#
+﻿<#
     FILE: Deploy-ToServer.ps1
     PURPOSE: Automatisierter Deploy-Workflow: Build WinPE + Hardening-Paket auf OPSI-Server
     LAST MODIFIED: 2026-04-23
-    MODIFIED BY: antigravity-agent
+    MODIFIED BY: Systems Administration
 
     .SYNOPSIS
     Fuehrt den kompletten Build- und Deploy-Workflow aus:
@@ -121,3 +121,4 @@ Write-Host "  systemctl restart opsiconfd" -ForegroundColor Gray
 Write-Host ""
 
 Write-Host "Deploy-Pipeline abgeschlossen." -ForegroundColor Green
+

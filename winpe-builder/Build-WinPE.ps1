@@ -1,10 +1,10 @@
-<#
+﻿<#
     FILE: Build-WinPE.ps1
     PURPOSE: Unified OPSI WinPE Builder - Erstellt vollstaendiges win11-x64 Netboot-Paket
     DEPENDS ON: Windows ADK (auto-install), Windows 11 ISO
     DEPENDED ON BY: OPSI Depot (win11-x64 Netboot Product)
     LAST MODIFIED: 2026-04-23
-    MODIFIED BY: antigravity-agent
+    MODIFIED BY: Systems Administration
     CHANGE SUMMARY: v3.0 - Zentrales config/environment.json, -Env Quick-Start, Repo-Restrukturierung
     BRANCH: main
 
@@ -1245,3 +1245,4 @@ if ($MyInvocation.InvocationName -ne '.') {
         Exit-Script 0
     }
 }
+
