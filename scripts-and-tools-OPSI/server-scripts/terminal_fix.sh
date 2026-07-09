@@ -21,7 +21,7 @@ read -r -d '' INPUTRC_CONFIG <<'EOF'
 "\eOH": beginning-of-line
 "\eOF": end-of-line
 
-# Fix PageUp and PageDown for history search
+# PageUp and PageDown bindings for history search
 "\e[5~": history-search-backward
 "\e[6~": history-search-forward
 
