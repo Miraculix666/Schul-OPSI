@@ -110,7 +110,7 @@ user_can_sudo() {
 }
 
 # The [ -t 1 ] check only works when the function is not called from
-# a subshell (like in `$(...)` or `(...)`, so this hack redefines the
+# a subshell (like in `$(...)` or `(...)`, so this workaround redefines the
 # function at the top level to always return false when stdout is not
 # a tty.
 if [ -t 1 ]; then
