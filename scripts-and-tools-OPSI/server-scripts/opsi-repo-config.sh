@@ -16,8 +16,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration variables
-REPO_DIR="/etc/opsi/package-updater.repos.d"
-LOG_FILE="/var/log/opsi-repo-config.log"
+REPO_DIR="${REPO_DIR:-/etc/opsi/package-updater.repos.d}"
+LOG_FILE="${LOG_FILE:-/var/log/opsi-repo-config.log}"
 
 # Function to print colored output
 print_status() {
@@ -37,7 +37,7 @@ print_warning() {
 }
 
 # Check if running as root
-if [[ $EUID -ne 0 ]]; then
+if [[ $EUID -ne 0 && "${SKIP_ROOT_CHECK:-0}" != "1" ]]; then
    print_error "This script must be run as root"
    exit 1
 fi
