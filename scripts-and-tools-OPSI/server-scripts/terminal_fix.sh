@@ -105,7 +105,7 @@ fix_inputrc_file() {
             # Skip comments and empty lines for the check
             if [[ ! "$line" =~ ^# && -n "$line" ]]; then
                 if ! grep -Fxq "$line" "$inputrc_file"; then
-                    missing_config+="$line\n"
+                    missing_config+="$line"$'\n'
                 fi
             fi
         done <<< "$INPUTRC_CONFIG"
@@ -115,8 +115,9 @@ fix_inputrc_file() {
             
             if ask_for_confirmation; then
                 # Add a separator and then the missing lines
-                echo -e "\n# Added by fix-my-terminal.sh" >> "$inputrc_file"
-                echo -e "$missing_config" >> "$inputrc_file"
+                echo "" >> "$inputrc_file"
+                echo "# Added by fix-my-terminal.sh" >> "$inputrc_file"
+                printf "%s" "$missing_config" >> "$inputrc_file"
                 print_message "green" "Die fehlenden Einstellungen wurden zu ~/.inputrc hinzugefügt."
             else
                 print_message "yellow" "Schritt übersprungen."
