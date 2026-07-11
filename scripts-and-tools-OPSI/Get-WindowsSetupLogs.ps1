@@ -139,19 +139,11 @@ function Test-UNCPathAccess {
         Write-Verbose "Verwende übergebene Credentials für den Zugriff."
         try {
             # Erfordert die PowerShell Remoting (WinRM) Umgebung
-            $UserName = $Cred.UserName
-            $Password = $Cred.GetNetworkCredential().Password
+            # Verwendung von 'New-PSDrive' zur temporären Authentifizierung des UNC-Pfades
+            Write-Verbose "Führe 'New-PSDrive' aus, um Verbindung herzustellen..."
             
-            # Verwendung von 'net use' zur temporären Authentifizierung des UNC-Pfades
-            # Dies ist robuster in Umgebungen ohne PS-Remoting
-            Write-Verbose "Führe 'net use' aus, um Verbindung herzustellen..."
-            
-            $netUseResult = & net.exe use $Path $Password /user:$UserName /persistent:no 2>&1
-            
-            if ($LASTEXITCODE -ne 0) {
-                 Write-Verbose "net use fehlgeschlagen (ExitCode $LASTEXITCODE). Ergebnis: $($netUseResult | Out-String)"
-                 return $false
-            }
+            $script:TempDriveName = [guid]::NewGuid().ToString().Substring(0,8)
+            $null = New-PSDrive -Name $script:TempDriveName -PSProvider FileSystem -Root $Path -Credential $Cred -ErrorAction Stop
             Write-Verbose "Netzwerkverbindung temporär erfolgreich hergestellt."
             return $true
         } catch {
@@ -272,13 +264,10 @@ foreach ($Source in $LogSources) {
     }
 }
 
-# Optional: Trennt die temporäre Netzwerkverbindung (falls 'net use' verwendet wurde)
-# ACHTUNG: Der 'net use' Befehl bleibt oft aktiv, bis das Skript beendet ist oder explizit getrennt wird.
-# Wir versuchen die Trennung nur, wenn eine Credential verwendet wurde.
-if ($Credential) {
-    Write-Verbose "Trenne temporäre Netzwerkverbindung zu '$UNCPath' (falls eingerichtet)."
-    # Verwende 'net use /delete', falls die Verbindung von net use erstellt wurde
-    & net.exe use $UNCPath /delete 2>&1 | Out-Null
+# Optional: Trennt die temporäre Netzwerkverbindung (falls 'New-PSDrive' verwendet wurde)
+if ($Credential -and $script:TempDriveName) {
+    Write-Verbose "Trenne temporäre Netzwerkverbindung (Drive '$script:TempDriveName')."
+    $null = Remove-PSDrive -Name $script:TempDriveName -ErrorAction SilentlyContinue
 }
 
 # --- 5. Abschluss und Erfolgsmeldung ---
