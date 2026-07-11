@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # --- Konfiguration ---
-OPSI_REPO_URL="http://download.uib.de/opsi4.3/stable/products"
+OPSI_REPO_URL="https://download.uib.de/opsi4.3/stable/products"
 UBUNTU_VERSION="jammy"
 SOURCES_FILE="/etc/apt/sources.list.d/opsi.list"
 # --- Ende Konfiguration ---
@@ -16,9 +16,9 @@ fi
 
 # 2. Füge den offiziellen uib GPG Schlüssel hinzu (Wichtig für die Paket-Authentizität)
 echo "Importiere uib GPG Schlüssel..."
-if ! sudo wget -O /etc/apt/trusted.gpg.d/opsi.gpg http://download.uib.de/opsi_pub.key 2>/dev/null; then
+if ! sudo wget -O /etc/apt/trusted.gpg.d/opsi.gpg https://download.uib.de/opsi_pub.key 2>/dev/null; then
     echo "FEHLER: Konnte den GPG Schlüssel nicht per wget herunterladen. Versuche per curl..."
-    if ! sudo curl -sS http://download.uib.de/opsi_pub.key | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/opsi.gpg; then
+    if ! sudo curl -sS https://download.uib.de/opsi_pub.key | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/opsi.gpg; then
         echo "FEHLER: Der Import des GPG-Schlüssels ist fehlgeschlagen. Bitte manuell prüfen."
         exit 1
     fi
