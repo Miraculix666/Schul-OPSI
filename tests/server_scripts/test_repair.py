@@ -1,5 +1,4 @@
 import unittest
-import sys
 import io
 import runpy
 from unittest.mock import MagicMock, patch
@@ -21,7 +20,7 @@ class TestRepair(unittest.TestCase):
 
         with patch.dict('sys.modules', {'opsicommon.client': mock_opsicommon_client, 'opsicommon': MagicMock()}):
             # Run the script
-            runpy.run_path('server-scripts/repair.py')
+            runpy.run_path('scripts-and-tools-OPSI/server-scripts/repair.py')
 
         # Assert output
         output = mock_stdout.getvalue()
@@ -39,7 +38,7 @@ class TestRepair(unittest.TestCase):
 
         with patch.dict('sys.modules', {'opsicommon.client': mock_opsicommon_client, 'opsicommon': MagicMock()}):
             # Run the script
-            runpy.run_path('server-scripts/repair.py')
+            runpy.run_path('scripts-and-tools-OPSI/server-scripts/repair.py')
 
         # Assert output
         output = mock_stdout.getvalue()
