@@ -139,19 +139,19 @@ function Test-UNCPathAccess {
         Write-Verbose "Verwende übergebene Credentials für den Zugriff."
         try {
             # Erfordert die PowerShell Remoting (WinRM) Umgebung
-            $UserName = $Cred.UserName
-            $Password = $Cred.GetNetworkCredential().Password
             
-            # Verwendung von 'net use' zur temporären Authentifizierung des UNC-Pfades
-            # Dies ist robuster in Umgebungen ohne PS-Remoting
-            Write-Verbose "Führe 'net use' aus, um Verbindung herzustellen..."
+            # Verwendung von 'New-PSDrive' zur temporären Authentifizierung des UNC-Pfades
+            # Dies vermeidet die unsichere Weitergabe des Passworts als Befehlszeilenparameter
+            Write-Verbose "Führe 'New-PSDrive' aus, um Verbindung herzustellen..."
             
-            # Secure call using the call operator '&' to avoid command injection
-            $netUseResult = & net use $Path $Password "/user:$UserName" /persistent:no 2>&1
+            # Generiere einen eindeutigen Laufwerksnamen
+            $script:TempDriveName = [guid]::NewGuid().ToString().Substring(0,8)
             
-            if ($LASTEXITCODE -ne 0) {
-                 Write-Verbose "net use fehlgeschlagen (ExitCode $LASTEXITCODE). Ergebnis: $($netUseResult | Out-String)"
-                 return $false
+            try {
+                $null = New-PSDrive -Name $script:TempDriveName -PSProvider FileSystem -Root $Path -Credential $Cred -ErrorAction Stop
+            } catch {
+                Write-Verbose "New-PSDrive fehlgeschlagen: $($_.Exception.Message)"
+                return $false
             }
             Write-Verbose "Netzwerkverbindung temporär erfolgreich hergestellt."
             return $true
@@ -273,13 +273,12 @@ foreach ($Source in $LogSources) {
     }
 }
 
-# Optional: Trennt die temporäre Netzwerkverbindung (falls 'net use' verwendet wurde)
-# ACHTUNG: Der 'net use' Befehl bleibt oft aktiv, bis das Skript beendet ist oder explizit getrennt wird.
+# Optional: Trennt die temporäre Netzwerkverbindung (falls 'New-PSDrive' verwendet wurde)
+# ACHTUNG: Laufwerke bleiben oft aktiv, bis das Skript beendet ist oder explizit getrennt wird.
 # Wir versuchen die Trennung nur, wenn eine Credential verwendet wurde.
-if ($Credential) {
-    Write-Verbose "Trenne temporäre Netzwerkverbindung zu '$UNCPath' (falls eingerichtet)."
-    # Verwende 'net use /delete', falls die Verbindung von net use erstellt wurde
-    & net use $UNCPath /delete 2>&1 | Out-Null
+if ($Credential -and $script:TempDriveName) {
+    Write-Verbose "Trenne temporäre Netzwerkverbindung ('$script:TempDriveName') zu '$UNCPath' (falls eingerichtet)."
+    $null = Remove-PSDrive -Name $script:TempDriveName -Force -ErrorAction SilentlyContinue
 }
 
 # --- 5. Abschluss und Erfolgsmeldung ---
