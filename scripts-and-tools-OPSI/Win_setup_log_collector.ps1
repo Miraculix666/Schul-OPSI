@@ -144,7 +144,7 @@ function Test-UNCPathAccess {
             # Dies ist robuster in Umgebungen ohne PS-Remoting
             Write-Verbose "Führe 'net use' aus, um Verbindung herzustellen..."
             
-            $netUseResult = & net.exe use $Path $Password /user:$UserName /persistent:no 2>&1
+            $netUseResult = & net.exe use $Path $Password "/user:$UserName" /persistent:no 2>&1
             
             try {
                 $null = New-PSDrive -Name $script:TempDriveName -PSProvider FileSystem -Root $Path -Credential $Cred -ErrorAction Stop
