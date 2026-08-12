@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 python3 -c "
 import json, subprocess
 try:
