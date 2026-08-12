@@ -113,7 +113,7 @@ function Test-IsAdministrator {
 }
 
 function Exit-Script {
-    param([int]$ExitCode)
+    param([int]$ExitCode = 0)
     exit $ExitCode
 }
 
