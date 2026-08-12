@@ -142,11 +142,10 @@ function Test-UNCPathAccess {
             # Verwendung von 'New-PSDrive' zur temporären Authentifizierung des UNC-Pfades
             Write-Verbose "Führe 'New-PSDrive' aus, um Verbindung herzustellen..."
             
-            # Verwendung von 'net use' zur temporären Authentifizierung des UNC-Pfades
+            # Verwendung von 'net.exe use' zur temporären Authentifizierung des UNC-Pfades
             # Dies ist robuster in Umgebungen ohne PS-Remoting
             Write-Verbose "Führe 'net use' aus, um Verbindung herzustellen..."
             
-            # Using the call operator '&' prevents command injection vulnerabilities
             $netUseResult = & net.exe use $Path $Password /user:$UserName /persistent:no 2>&1
             
             if ($LASTEXITCODE -ne 0) {
@@ -279,7 +278,6 @@ foreach ($Source in $LogSources) {
 if ($Credential) {
     Write-Verbose "Trenne temporäre Netzwerkverbindung zu '$UNCPath' (falls eingerichtet)."
     # Verwende 'net use /delete', falls die Verbindung von net use erstellt wurde
-    # Using the call operator '&' prevents command injection vulnerabilities
     & net.exe use $UNCPath /delete 2>&1 | Out-Null
 }
 
