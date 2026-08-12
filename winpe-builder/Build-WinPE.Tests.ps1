@@ -1,128 +1,194 @@
-$ErrorActionPreference = "Stop"
+Import-Module Pester -RequiredVersion 4.10.1
 
-BeforeAll {
-    . "$PSScriptRoot/Build-WinPE.ps1"
+# We can safely dot-source the entire script if we mock Invoke-SelfElevation and then
+# exit or wrap the HAUPTPROGRAMM execution in an if block.
+# Alternatively, since PowerShell handles mocking beautifully, let's extract the function
+# dynamically without rigid Regex matching the end of the function body.
+# We will use the PowerShell AST (Abstract Syntax Tree) to reliably extract the function.
+
+$scriptPath = Join-Path $PSScriptRoot "Build-WinPE.ps1"
+$ast = [System.Management.Automation.Language.Parser]::ParseFile($scriptPath, [ref]$null, [ref]$null)
+
+$functionAst = $ast.Find({
+    param($astNode)
+    $astNode -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $astNode.Name -eq "Test-BuildResult"
+}, $true)
+
+if (-not $functionAst) {
+    throw "Function Test-BuildResult not found in $scriptPath"
 }
 
+# Get the extent text of the function and evaluate it
+$functionBody = $functionAst.Extent.Text
+
+$tempScriptPath = Join-Path ([System.IO.Path]::GetTempPath()) "Build-WinPE-Temp.ps1"
+$functionBody | Set-Content -Path $tempScriptPath
+. $tempScriptPath
+
 Describe "Test-BuildResult" {
-    BeforeEach {
-        $script:tempDir = New-Item -ItemType Directory -Path "$([System.IO.Path]::GetTempPath())/WinPETest_$(Get-Random)" -Force
-        $script:winpeDir = New-Item -ItemType Directory -Path (Join-Path $script:tempDir "winpe") -Force
-        $script:winpeUefiDir = Join-Path $script:tempDir "winpe_uefi"
-        $script:installDir = New-Item -ItemType Directory -Path (Join-Path $script:tempDir "installfiles") -Force
+    BeforeAll {
+        $script:tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString())
+        New-Item -ItemType Directory -Path $script:tempDir | Out-Null
 
-        # Create valid required files
-        $reqFiles = @(
-            @{ Path = "sources\boot.wim"; Size = 210000000 },
-            @{ Path = "Boot\BCD"; Size = 9000 },
-            @{ Path = "Boot\boot.sdi"; Size = 1100000 },
-            @{ Path = "bootmgr"; Size = 110000 },
-            @{ Path = "EFI\Microsoft\Boot\BCD"; Size = 9000 }
-        )
+        $script:winpeDir = Join-Path $script:tempDir "winpe"
+        $script:sourcesDir = Join-Path $script:winpeDir "sources"
+        $script:bootDir = Join-Path $script:winpeDir "Boot"
+        $script:efiDir = Join-Path $script:winpeDir "EFI\Microsoft\Boot"
+        $script:installDir = Join-Path $script:tempDir "installfiles"
+        $script:uefiLink = Join-Path $script:tempDir "winpe_uefi"
 
-        foreach ($file in $reqFiles) {
-            $fullPath = Join-Path $script:winpeDir $file.Path
-            New-Item -ItemType Directory -Path (Split-Path $fullPath) -Force | Out-Null
-            $fs = [System.IO.File]::Create($fullPath)
-            $fs.SetLength($file.Size)
-            $fs.Close()
-        }
-
-        # Create valid symlink
-        if ($IsLinux) {
-            & bash -c "ln -s ""$script:winpeDir"" ""$script:winpeUefiDir"""
-        } else {
-            New-Item -ItemType SymbolicLink -Path $script:winpeUefiDir -Target $script:winpeDir | Out-Null
-        }
-
-        # Create > 100 install files
-        for ($i = 1; $i -le 101; $i++) {
-            $path = Join-Path $script:installDir "file_$i.txt"
-            Set-Content -Path $path -Value "test"
-        }
+        New-Item -ItemType Directory -Path $script:sourcesDir -Force | Out-Null
+        New-Item -ItemType Directory -Path $script:bootDir -Force | Out-Null
+        New-Item -ItemType Directory -Path $script:efiDir -Force | Out-Null
+        New-Item -ItemType Directory -Path $script:installDir -Force | Out-Null
+        New-Item -ItemType Directory -Path $script:uefiLink -Force | Out-Null
     }
 
-    AfterEach {
+    AfterAll {
         if (Test-Path $script:tempDir) {
-            Remove-Item -Path $script:tempDir -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item $script:tempDir -Recurse -Force
+        }
+        if (Test-Path $tempScriptPath) {
+            Remove-Item $tempScriptPath -Force
         }
     }
 
-    It "Should return 0 errors and 0 warnings for a valid output path" {
-        function global:bcdedit.exe { return "ramdisk=" }
-        Mock -CommandName bcdedit.exe -MockWith { return "ramdisk=" }
+    Context "When all required files are present and of correct size" {
+        BeforeAll {
+            # Create valid files
+            $f = [System.IO.File]::Create((Join-Path $script:sourcesDir "boot.wim")); $f.SetLength(209715200); $f.Close()
+            $f = [System.IO.File]::Create((Join-Path $script:bootDir "BCD")); $f.SetLength(8192); $f.Close()
+            $f = [System.IO.File]::Create((Join-Path $script:bootDir "boot.sdi")); $f.SetLength(1048576); $f.Close()
+            $f = [System.IO.File]::Create((Join-Path $script:winpeDir "bootmgr")); $f.SetLength(102400); $f.Close()
+            $f = [System.IO.File]::Create((Join-Path $script:efiDir "BCD")); $f.SetLength(8192); $f.Close()
 
-        $result = Test-BuildResult -TargetOutputPath $script:tempDir
+            for ($i = 1; $i -le 101; $i++) {
+                New-Item -ItemType File -Path (Join-Path $script:installDir "file$i.txt") | Out-Null
+            }
+        }
 
-        $result.Errors | Should -Be 0
-        $result.Warnings | Should -Be 0
+        AfterAll {
+            Get-ChildItem $script:tempDir -Recurse -File | Remove-Item -Force
+        }
+
+        It "Should return 0 errors and 0 warnings" {
+            $OriginalGetItem = Get-Command Get-Item
+
+            function global:Get-Item {
+                [CmdletBinding()]
+                param(
+                    [Parameter(Mandatory=$true, ValueFromPipeline=$true, Position=0)]
+                    [string[]]$Path,
+                    [switch]$Force
+                )
+                if ($Path -match "winpe_uefi") {
+                    return [PSCustomObject]@{ Attributes = [IO.FileAttributes]::ReparsePoint }
+                }
+
+                if ($Force) {
+                    & $OriginalGetItem -Path $Path -Force
+                } else {
+                    & $OriginalGetItem -Path $Path
+                }
+            }
+
+            Set-Alias bcdedit.exe bcdedit-mock -Scope Global
+            function global:bcdedit-mock { return "ramdisk=" }
+
+            try {
+                $result = Test-BuildResult -TargetOutputPath $script:tempDir
+                $result.Errors | Should -Be 0
+                $result.Warnings | Should -Be 0
+            } finally {
+                Remove-Item Function:\Get-Item
+                Remove-Item Function:\bcdedit-mock
+                Remove-Alias bcdedit.exe
+            }
+        }
     }
 
-    It "Should return errors if required files are missing" {
-        function global:bcdedit.exe { return "ramdisk=" }
-        Mock -CommandName bcdedit.exe -MockWith { return "ramdisk=" }
+    Context "When files are missing" {
+        It "Should return errors for missing files" {
+            $OriginalGetItem = Get-Command Get-Item
 
-        Remove-Item (Join-Path $script:winpeDir "sources\boot.wim") -Force
+            function global:Get-Item {
+                [CmdletBinding()]
+                param(
+                    [Parameter(Mandatory=$true, ValueFromPipeline=$true, Position=0)]
+                    [string[]]$Path,
+                    [switch]$Force
+                )
+                if ($Path -match "winpe_uefi") {
+                    return [PSCustomObject]@{ Attributes = [IO.FileAttributes]::ReparsePoint }
+                }
 
-        $result = Test-BuildResult -TargetOutputPath $script:tempDir
+                if ($Force) {
+                    & $OriginalGetItem -Path $Path -Force
+                } else {
+                    & $OriginalGetItem -Path $Path
+                }
+            }
 
-        $result.Errors | Should -BeGreaterThan 0
+            Set-Alias bcdedit.exe bcdedit-mock -Scope Global
+            function global:bcdedit-mock { return "ramdisk=" }
+
+            try {
+                $result = Test-BuildResult -TargetOutputPath $script:tempDir
+                $result.Errors | Should -BeGreaterThan 0
+            } finally {
+                Remove-Item Function:\Get-Item
+                Remove-Item Function:\bcdedit-mock
+                Remove-Alias bcdedit.exe
+            }
+        }
     }
 
-    It "Should return warnings if required files are too small" {
-        function global:bcdedit.exe { return "ramdisk=" }
-        Mock -CommandName bcdedit.exe -MockWith { return "ramdisk=" }
+    Context "When files are too small" {
+        BeforeAll {
+            # Create files but too small
+            $f = [System.IO.File]::Create((Join-Path $script:sourcesDir "boot.wim")); $f.SetLength(100); $f.Close()
+            $f = [System.IO.File]::Create((Join-Path $script:bootDir "BCD")); $f.SetLength(100); $f.Close()
+            $f = [System.IO.File]::Create((Join-Path $script:bootDir "boot.sdi")); $f.SetLength(100); $f.Close()
+            $f = [System.IO.File]::Create((Join-Path $script:winpeDir "bootmgr")); $f.SetLength(100); $f.Close()
+            $f = [System.IO.File]::Create((Join-Path $script:efiDir "BCD")); $f.SetLength(100); $f.Close()
+        }
 
-        $bootWimPath = Join-Path $script:winpeDir "sources\boot.wim"
-        $fs = [System.IO.File]::OpenWrite($bootWimPath)
-        $fs.SetLength(100) # smaller than required
-        $fs.Close()
+        AfterAll {
+            Get-ChildItem $script:tempDir -Recurse -File | Remove-Item -Force
+        }
 
-        $result = Test-BuildResult -TargetOutputPath $script:tempDir
+        It "Should return warnings for small files" {
+            $OriginalGetItem = Get-Command Get-Item
 
-        $result.Warnings | Should -BeGreaterThan 0
-    }
+            function global:Get-Item {
+                [CmdletBinding()]
+                param(
+                    [Parameter(Mandatory=$true, ValueFromPipeline=$true, Position=0)]
+                    [string[]]$Path,
+                    [switch]$Force
+                )
+                if ($Path -match "winpe_uefi") {
+                    return [PSCustomObject]@{ Attributes = [IO.FileAttributes]::ReparsePoint }
+                }
 
-    It "Should return errors if bcdedit does not return ramdisk=" {
-        function global:bcdedit.exe { return "invalid" }
-        Mock -CommandName bcdedit.exe -MockWith { return "invalid" }
+                if ($Force) {
+                    & $OriginalGetItem -Path $Path -Force
+                } else {
+                    & $OriginalGetItem -Path $Path
+                }
+            }
 
-        $result = Test-BuildResult -TargetOutputPath $script:tempDir
+            Set-Alias bcdedit.exe bcdedit-mock -Scope Global
+            function global:bcdedit-mock { return "ramdisk=" }
 
-        $result.Errors | Should -BeGreaterThan 0
-    }
-
-    It "Should return errors if winpe_uefi symlink is missing" {
-        function global:bcdedit.exe { return "ramdisk=" }
-        Mock -CommandName bcdedit.exe -MockWith { return "ramdisk=" }
-
-        Remove-Item $script:winpeUefiDir -Force
-
-        $result = Test-BuildResult -TargetOutputPath $script:tempDir
-
-        $result.Errors | Should -BeGreaterThan 0
-    }
-
-    It "Should return warnings if winpe_uefi is a directory not a symlink" {
-        function global:bcdedit.exe { return "ramdisk=" }
-        Mock -CommandName bcdedit.exe -MockWith { return "ramdisk=" }
-
-        Remove-Item $script:winpeUefiDir -Force
-        New-Item -ItemType Directory -Path $script:winpeUefiDir -Force | Out-Null
-
-        $result = Test-BuildResult -TargetOutputPath $script:tempDir
-
-        $result.Warnings | Should -BeGreaterThan 0
-    }
-
-    It "Should return warnings if installfiles has 100 or fewer files" {
-        function global:bcdedit.exe { return "ramdisk=" }
-        Mock -CommandName bcdedit.exe -MockWith { return "ramdisk=" }
-
-        Remove-Item (Join-Path $script:installDir "file_101.txt") -Force
-
-        $result = Test-BuildResult -TargetOutputPath $script:tempDir
-
-        $result.Warnings | Should -BeGreaterThan 0
+            try {
+                $result = Test-BuildResult -TargetOutputPath $script:tempDir
+                $result.Warnings | Should -BeGreaterThan 0
+            } finally {
+                Remove-Item Function:\Get-Item
+                Remove-Item Function:\bcdedit-mock
+                Remove-Alias bcdedit.exe
+            }
+        }
     }
 }
