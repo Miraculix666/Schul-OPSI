@@ -140,12 +140,12 @@ function Test-UNCPathAccess {
         try {
             # Erfordert die PowerShell Remoting (WinRM) Umgebung
             
-            # Verwendung von 'New-PSDrive' zur temporären Authentifizierung des UNC-Pfades
-            # Dies vermeidet die unsichere Weitergabe des Passworts als Befehlszeilenparameter
-            Write-Verbose "Führe 'New-PSDrive' aus, um Verbindung herzustellen..."
+            # Verwendung von 'net use' zur temporären Authentifizierung des UNC-Pfades
+            # Dies ist robuster in Umgebungen ohne PS-Remoting
+            Write-Verbose "Führe 'net use' aus, um Verbindung herzustellen..."
             
-            # Generiere einen eindeutigen Laufwerksnamen
-            $script:TempDriveName = [guid]::NewGuid().ToString().Substring(0,8)
+            # Using the call operator '&' prevents command injection vulnerabilities
+            $netUseResult = & net.exe use $Path $Password /user:$UserName /persistent:no 2>&1
             
             try {
                 $null = New-PSDrive -Name $script:TempDriveName -PSProvider FileSystem -Root $Path -Credential $Cred -ErrorAction Stop
@@ -276,9 +276,11 @@ foreach ($Source in $LogSources) {
 # Optional: Trennt die temporäre Netzwerkverbindung (falls 'New-PSDrive' verwendet wurde)
 # ACHTUNG: Laufwerke bleiben oft aktiv, bis das Skript beendet ist oder explizit getrennt wird.
 # Wir versuchen die Trennung nur, wenn eine Credential verwendet wurde.
-if ($Credential -and $script:TempDriveName) {
-    Write-Verbose "Trenne temporäre Netzwerkverbindung ('$script:TempDriveName') zu '$UNCPath' (falls eingerichtet)."
-    $null = Remove-PSDrive -Name $script:TempDriveName -Force -ErrorAction SilentlyContinue
+if ($Credential) {
+    Write-Verbose "Trenne temporäre Netzwerkverbindung zu '$UNCPath' (falls eingerichtet)."
+    # Verwende 'net use /delete', falls die Verbindung von net use erstellt wurde
+    # Using the call operator '&' prevents command injection vulnerabilities
+    & net.exe use $UNCPath /delete 2>&1 | Out-Null
 }
 
 # --- 5. Abschluss und Erfolgsmeldung ---
