@@ -1119,7 +1119,8 @@ function Invoke-Cleanup {
 # ============================================================================
 
 if ($MyInvocation.InvocationName -ne '.') {
-    Show-Banner
+
+Show-Banner
 
     # 0. Auto-Elevation
     Invoke-SelfElevation
@@ -1246,3 +1247,4 @@ if ($MyInvocation.InvocationName -ne '.') {
     }
 }
 
+}
