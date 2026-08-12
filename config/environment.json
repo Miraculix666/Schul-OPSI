@@ -50,6 +50,7 @@
     "OPSI": {
         "ServerAddress": "sopsi",
         "ServerUser": "adminuser",
+        "_comment_ServerPassword": "OPSI-Server Passwort (über Umgebungsvariable oder Secret Store beziehen)",
         "ServerPassword": "",
 
         "_comment_DepotBasePath": "Linux-Pfad auf dem OPSI-Server",
