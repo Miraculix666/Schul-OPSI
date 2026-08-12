@@ -523,4 +523,3 @@ if ($PSCmdlet.ShouldProcess("Benutzer (SYSTEM)", "Benutzerspezifische Härtung a
 Write-Host "--- Vollständige Härtung und Konfiguration abgeschlossen. Details im Logfile. ---" -ForegroundColor Green
 Write-LogEntry -Message "Skript erfolgreich beendet."
 
-
