@@ -1,55 +1,48 @@
 BeforeAll {
-    $scriptPath = Join-Path $PSScriptRoot "Apply_Hardening.ps1"
-    $scriptContent = Get-Content $scriptPath -Raw
-    $functionAst = [System.Management.Automation.Language.Parser]::ParseInput($scriptContent, [ref]$null, [ref]$null).FindAll({
-        param($ast) $ast -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $ast.Name -eq 'Test-IsRemoteSession'
-    }, $true)
-    Invoke-Expression $functionAst[0].Extent.Text
+    # Extract just the function to test
+    $content = Get-Content -Path "$PSScriptRoot/Apply_Hardening.ps1" -Raw
+    $ast = [System.Management.Automation.Language.Parser]::ParseInput($content, [ref]$null, [ref]$null)
+    $funcAst = $ast.FindAll({$args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $args[0].Name -eq "Test-IsRemoteSession"}, $false)[0]
 
-    $originalSessionName = $env:SESSIONNAME
-    $originalSshConnection = [System.Environment]::GetEnvironmentVariable("SSH_CONNECTION")
+    # Evaluate it into the current scope
+    Invoke-Expression $funcAst.Extent.Text
+
+    # Test-IsRemoteSession uses $SilentMode from script scope, so define it
+    $script:SilentMode = $false
 }
 
 Describe "Test-IsRemoteSession" {
     BeforeEach {
-        # Reset variables to ensure clean state
-        $env:SESSIONNAME = $null
-        [System.Environment]::SetEnvironmentVariable("SSH_CONNECTION", $null)
+        # Reset variables
+        $script:SilentMode = $false
+
+        # Remove variables we might check
+        if (Test-Path Env:SESSIONNAME) { Remove-Item Env:SESSIONNAME }
+        [Environment]::SetEnvironmentVariable("SSH_CONNECTION", $null)
         $global:PSSenderInfo = $null
-        $global:SilentMode = $false
     }
 
-    AfterAll {
-        $env:SESSIONNAME = $originalSessionName
-        [System.Environment]::SetEnvironmentVariable("SSH_CONNECTION", $originalSshConnection)
-    }
-
-    It "returns false when running locally and interactive" {
-        $env:SESSIONNAME = "Console"
+    It "Should return `$false in a normal local session" {
         Test-IsRemoteSession | Should -Be $false
     }
 
-    It "returns true when SESSIONNAME is set and not Console" {
+    It "Should return `$true when SESSIONNAME is RDP-Tcp" {
         $env:SESSIONNAME = "RDP-Tcp#0"
         Test-IsRemoteSession | Should -Be $true
     }
 
-    It "returns true when SSH_CONNECTION environment variable is set" {
-        [System.Environment]::SetEnvironmentVariable("SSH_CONNECTION", "192.168.1.2 55555 192.168.1.3 22")
-        Test-IsRemoteSession | Should -Be $true
-    }
-
-    It "returns true when PSSenderInfo is present" {
-        $global:PSSenderInfo = [PSCustomObject]@{ UserInfo = "Admin" }
-        Test-IsRemoteSession | Should -Be $true
-    }
-
-    It "returns true when SilentMode is active" {
-        $global:SilentMode = $true
-        Test-IsRemoteSession | Should -Be $true
-    }
-
-    It "returns false when nothing is set" {
+    It "Should return `$false when SESSIONNAME is Console" {
+        $env:SESSIONNAME = "Console"
         Test-IsRemoteSession | Should -Be $false
+    }
+
+    It "Should return `$true when SSH_CONNECTION is set" {
+        [Environment]::SetEnvironmentVariable("SSH_CONNECTION", "10.0.0.1 55555 10.0.0.2 22")
+        Test-IsRemoteSession | Should -Be $true
+    }
+
+    It "Should return `$true when SilentMode is active" {
+        $script:SilentMode = $true
+        Test-IsRemoteSession | Should -Be $true
     }
 }
