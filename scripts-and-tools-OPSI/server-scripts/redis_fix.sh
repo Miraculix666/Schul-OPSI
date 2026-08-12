@@ -34,9 +34,6 @@ TimeoutStartSec=30
 TimeoutStopSec=30
 # Deaktiviere problematische systemd notify flags
 Type=simple
-NotifyAccess=none
-RuntimeDirectory=redis
-RuntimeDirectoryMode=0755
 EOF
 
 # ====================================================
