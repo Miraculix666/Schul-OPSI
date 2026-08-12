@@ -40,8 +40,7 @@ EOF
 # 3. REDIS.CONF SYSTEMD-FIX (supervised NO)
 # ====================================================
 log "??  Config: supervised systemd ? no..."
-sed -i 's/^supervised systemd/supervised no/' /etc/redis/redis.conf 2>/dev/null || \
-sed -i 's/^supervised .*/supervised no/' /etc/redis/redis.conf
+sed -i 's/^supervised .*/supervised no/' /etc/redis/redis.conf 2>/dev/null || true
 
 # Bind explizit setzen
 echo "bind 127.0.0.1" >> /etc/redis/redis.conf
