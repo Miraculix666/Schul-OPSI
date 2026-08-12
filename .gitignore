@@ -17,7 +17,5 @@ copype_*.log
 # OS
 Thumbs.db
 Desktop.ini
-
-# Directory Junctions
-win11-hardening/
-
+__pycache__/
+*.pyc
