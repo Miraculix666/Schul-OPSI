@@ -153,12 +153,15 @@ if ($PSCmdlet.ShouldProcess("System", "Wake-on-LAN (WOL) konfigurieren")) {
         # 4.2 NIC-Einstellungen (WMI für physische Adapter)
         # Sucht physische Adapter mit IP und aktiviert WOL-Optionen
         $PhysicalAdapters = Get-CimInstance -ClassName Win32_NetworkAdapter -Filter "NetConnectionID IS NOT NULL AND PhysicalAdapter = TRUE"
+        $AllNetworkConfigs = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "IPEnabled = TRUE" -ErrorAction SilentlyContinue
+        $AllPMCs = Get-CimInstance -Namespace "root\wmi" -ClassName MSiDN_PowerManagementCapabilities -ErrorAction SilentlyContinue
+
         foreach ($Adapter in $PhysicalAdapters) {
             try {
-                $PowerManagement = Get-CimAssociatedInstance -InputObject $Adapter -ResultClassName Win32_NetworkAdapterConfiguration
-                if ($PowerManagement.IPEnabled) {
+                $PowerManagement = $AllNetworkConfigs | Where-Object { $_.Index -eq $Adapter.Index }
+                if ($PowerManagement) {
                      # Hole die Power Management Fähigkeiten
-                    $PMC = Get-CimAssociatedInstance -InputObject $Adapter -ResultClassName Win32_PNPEntity | Get-CimInstance -ClassName MSiDN_PowerManagementCapabilities # Dies braucht ggf. Admin-Rechte
+                    $PMC = $AllPMCs | Where-Object { $_.InstanceName -like "$($Adapter.PNPDeviceID)*" }
                     
                     if ($PMC -and $PMC.WakeFromPowerState -contains 3) { # Prüft ob Magic Packet unterstützt wird
                          # Aktiviere die Power Management Features über WMI Methoden (vorsichtig!)
