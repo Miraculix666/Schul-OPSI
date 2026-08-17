@@ -153,15 +153,27 @@ if ($PSCmdlet.ShouldProcess("System", "Wake-on-LAN (WOL) konfigurieren")) {
         # 4.2 NIC-Einstellungen (WMI für physische Adapter)
         # Sucht physische Adapter mit IP und aktiviert WOL-Optionen
         $PhysicalAdapters = Get-CimInstance -ClassName Win32_NetworkAdapter -Filter "NetConnectionID IS NOT NULL AND PhysicalAdapter = TRUE"
-        $AllNetworkConfigs = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "IPEnabled = TRUE" -ErrorAction SilentlyContinue
-        $AllPMCs = Get-CimInstance -Namespace "root\wmi" -ClassName MSiDN_PowerManagementCapabilities -ErrorAction SilentlyContinue
-
+        $AllNetworkAdapterConfigs = $null
+        $AllPMCs = $null
+        if ($PhysicalAdapters) {
+            $AllNetworkAdapterConfigs = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -ErrorAction SilentlyContinue
+            $AllPMCs = Get-CimInstance -Namespace "root\wmi" -ClassName MSiDN_PowerManagementCapabilities -ErrorAction SilentlyContinue
+            if (-not $AllPMCs) {
+                $AllPMCs = Get-CimInstance -ClassName MSiDN_PowerManagementCapabilities -ErrorAction SilentlyContinue
+            }
+        }
         foreach ($Adapter in $PhysicalAdapters) {
             try {
-                $PowerManagement = $AllNetworkConfigs | Where-Object { $_.Index -eq $Adapter.Index }
-                if ($PowerManagement) {
+                $PowerManagement = $null
+                if ($AllNetworkAdapterConfigs) {
+                    $PowerManagement = $AllNetworkAdapterConfigs | Where-Object { $_.Index -eq $Adapter.Index }
+                }
+                if ($PowerManagement -and $PowerManagement.IPEnabled) {
                      # Hole die Power Management Fähigkeiten
-                    $PMC = $AllPMCs | Where-Object { $_.InstanceName -like "$($Adapter.PNPDeviceID)*" }
+                    $PMC = $null
+                    if ($AllPMCs) {
+                        $PMC = $AllPMCs | Where-Object { $_.InstanceName -match [regex]::Escape($Adapter.PNPDeviceID) }
+                    } # Dies braucht ggf. Admin-Rechte
                     
                     if ($PMC -and $PMC.WakeFromPowerState -contains 3) { # Prüft ob Magic Packet unterstützt wird
                          # Aktiviere die Power Management Features über WMI Methoden (vorsichtig!)
