@@ -588,13 +588,14 @@ function Export-OPSIStructure {
             "sources\boot.wim"
         )
         
-        $missing = @()
-        foreach ($file in $critical) {
-            $fullPath = Join-Path $target $file
-            if (-not (Test-Path $fullPath)) {
-                $missing += $file
+        $missing = @(
+            foreach ($file in $critical) {
+                $fullPath = Join-Path $target $file
+                if (-not (Test-Path $fullPath)) {
+                    $file
+                }
             }
-        }
+        )
         
         if ($missing.Count -gt 0) {
             Write-Log "Fehlende Dateien in ${dirName}: $($missing -join ', ')" -Level WARNING
