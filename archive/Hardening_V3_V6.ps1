@@ -153,21 +153,27 @@ if ($PSCmdlet.ShouldProcess("System", "Wake-on-LAN (WOL) konfigurieren")) {
         # 4.2 NIC-Einstellungen (WMI für physische Adapter)
         # Sucht physische Adapter mit IP und aktiviert WOL-Optionen
         $PhysicalAdapters = Get-CimInstance -ClassName Win32_NetworkAdapter -Filter "NetConnectionID IS NOT NULL AND PhysicalAdapter = TRUE"
+
+        # Pre-fetch WMI/CIM instances and Driver Registries to optimize performance
+        $AllNetConfigs = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration
+        $AllPMCs = Get-CimInstance -ClassName MSiDN_PowerManagementCapabilities -ErrorAction SilentlyContinue
+
+        $DriverKeyPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}"
+        $AllDriverInstances = Get-ChildItem -Path $DriverKeyPath -Recurse -ErrorAction SilentlyContinue
+
         foreach ($Adapter in $PhysicalAdapters) {
             try {
-                $PowerManagement = Get-CimAssociatedInstance -InputObject $Adapter -ResultClassName Win32_NetworkAdapterConfiguration
+                $PowerManagement = $AllNetConfigs | Where-Object { $_.Index -eq $Adapter.Index }
                 if ($PowerManagement.IPEnabled) {
                      # Hole die Power Management Fähigkeiten
-                    $PMC = Get-CimAssociatedInstance -InputObject $Adapter -ResultClassName Win32_PNPEntity | Get-CimInstance -ClassName MSiDN_PowerManagementCapabilities # Dies braucht ggf. Admin-Rechte
+                    $PMC = $AllPMCs | Where-Object { $_.InstanceName -like "*$($Adapter.PNPDeviceID)*" -or $_.InstanceName -like "*$($Adapter.Name)*" }
                     
                     if ($PMC -and $PMC.WakeFromPowerState -contains 3) { # Prüft ob Magic Packet unterstützt wird
                          # Aktiviere die Power Management Features über WMI Methoden (vorsichtig!)
                         # (Get-WmiObject Win32_NetworkAdapter -Filter "Index=$($Adapter.Index)").EnableWakeOnLan(1) # Beispiel, genaue Methode kann variieren
                         
                         # Sichererer Ansatz: Registry für bekannte Treiber (Intel/Realtek)
-                        $PnPDeviceID = $Adapter.PNPDeviceID
-                        $DriverKeyPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}" # Network Adapters Class GUID
-                        $DriverInstances = Get-ChildItem -Path $DriverKeyPath -Recurse -ErrorAction SilentlyContinue | Where-Object { (Get-ItemProperty -Path $_.PSPath -Name "DriverDesc" -ErrorAction SilentlyContinue)."DriverDesc" -eq $Adapter.Name }
+                        $DriverInstances = $AllDriverInstances | Where-Object { (Get-ItemProperty -Path $_.PSPath -Name "DriverDesc" -ErrorAction SilentlyContinue)."DriverDesc" -eq $Adapter.Name }
 
                         foreach ($Instance in $DriverInstances) {
                             # Intel: EnablePME=1 / WakeOnMagicPacket=1
