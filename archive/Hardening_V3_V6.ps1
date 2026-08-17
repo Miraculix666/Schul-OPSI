@@ -391,7 +391,7 @@ if ($PSCmdlet.ShouldProcess("System", "Systemweite Härtung anwenden")) {
         "*ScreenSketch*", # Ausschneiden und Skizzieren
         "*SoundRecorder*", # Sprachrekorder
         "*StickyNotes*", # Kurznotizen
-        "*Microsoft.Todos*", # Microsoft To Do telemetry is disabled since the app is removed
+        "*Microsoft.Todos*", # Microsoft To Do
         "*Wallet*",
         "*WebExperience*", # Widgets
         "*Weather*", # MSN Wetter
