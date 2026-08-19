@@ -1,0 +1,65 @@
+{
+    "_comment": "Schul-OPSI Zentrale Konfigurations-Vorlage (Blueprint)",
+
+    "Build": {
+        "IsoPath": "D:\\temp\\WinPE.ISO",
+        "WinImageIsoPath": "D:\\temp\\Win11_Ent_hard.iso",
+        "OutputPath": "C:\\PSC_WinPE_Output",
+        "WorkingPath": "C:\\Temp",
+        "CachePath": "C:\\temp_winPE",
+        "DriverSource": "D:\\temp\\WinPE\\driver",
+        "ToolsSource": "D:\\temp\\WinPE\\APPS",
+        "Architecture": "amd64",
+        "ADK_Path": "",
+        "UseCache": true
+    },
+
+    "Product": {
+        "ProductId": "win11-x64",
+        "ProductName": "Windows 11 LTSC Enterprise",
+        "ProductVersion": "24H2",
+        "ImageIndex": 1
+    },
+
+    "Windows": {
+        "ProductKey": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX",
+        "AdminPassword": "",
+        "AdminUser": "admin",
+        "ComputerName": "*",
+        "Locale": "de-DE",
+        "TimeZone": "W. Europe Standard Time"
+    },
+
+    "OPSI": {
+        "ServerAddress": "sopsi",
+        "ServerUser": "adminuser",
+        "ServerPassword": "",
+        "DepotBasePath": "/var/lib/opsi/depot",
+        "DepotSharePath": "Y:\\",
+        "ImageName": ""
+    },
+
+    "Deployment": {
+        "InstallTo": "disk",
+        "AskBeforeInstall": false,
+        "HardwareCheck": false,
+        "BypassTPMCheck": true,
+        "BypassCPUCheck": true,
+        "BypassRAMCheck": true
+    },
+
+    "Hardening": {
+        "EnableDefender": false,
+        "DisableStore": true,
+        "EnableLSAProtection": true,
+        "EnableCredentialGuard": false,
+        "SkipDriverInstall": false,
+        "DriversPath": "C:\\Drivers_Temp"
+    },
+
+    "Meta": {
+        "LastRun": "",
+        "LastRunBy": "",
+        "ScriptVersion": "3.0.0"
+    }
+}
