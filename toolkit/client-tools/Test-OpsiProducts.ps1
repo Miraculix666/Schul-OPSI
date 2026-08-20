@@ -6,8 +6,12 @@
 
 $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$RepoRoot = Split-Path $ScriptDir -Parent
-$ProductsDir = Join-Path $RepoRoot "OPSI-Produkte"
+$RepoRoot = (Get-Item (Join-Path $ScriptDir "..\..")).FullName
+$ProductsDir = Join-Path $RepoRoot "packages"
+if (-not (Test-Path $ProductsDir)) {
+    $ProductsDir = Join-Path $RepoRoot "OPSI-Produkte"
+}
+
 
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host "   Schul-OPSI Richtlinien-Validator V1.0" -ForegroundColor Cyan
@@ -17,6 +21,7 @@ if (-not (Test-Path $ProductsDir)) {
     Write-Host "[OK] Ordner '$ProductsDir' existiert nicht. Keine Produkte zu prüfen." -ForegroundColor Green
     Exit 0
 }
+
 
 $SubDirs = Get-ChildItem -Path $ProductsDir -Directory
 $AnyFailed = $false

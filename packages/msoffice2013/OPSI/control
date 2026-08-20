@@ -1,20 +1,14 @@
 [Package]
 version: 1
-id: msoffice2013
-name: MS Office
-description: Microsoft Office (Unattended, Telemetrie-gehärtet, ODT-basiert)
-advice: Produktschlüssel (MAK/GVLK) kann in der OPSI-GUI über die Property 'productkey' eingegeben werden. KMS-Server optional via 'kms_server'.
-version: 1
-productversion: 16.0
+depends: 
 
 [Product]
 type: localboot
 id: msoffice2013
 name: MS Office
 description: Microsoft Office Professional Plus (Fully Unattended, Hardened Telemetry)
-advice: 
-version: 1
-productversion: 16.0
+advice: Produktschlüssel (MAK/GVLK) kann über Property 'productkey' gesetzt werden. KMS-Server optional via 'kms_server'.
+version: 16.0
 priority: 0
 licenseRequired: False
 productClasses: 
