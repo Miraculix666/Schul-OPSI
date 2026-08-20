@@ -1,0 +1,69 @@
+[Package]
+version: 1
+id: msoffice2013
+name: MS Office
+description: Microsoft Office (Unattended, Telemetrie-gehärtet, ODT-basiert)
+advice: Produktschlüssel (MAK/GVLK) kann in der OPSI-GUI über die Property 'productkey' eingegeben werden. KMS-Server optional via 'kms_server'.
+version: 1
+productversion: 16.0
+
+[Product]
+type: localboot
+id: msoffice2013
+name: MS Office
+description: Microsoft Office Professional Plus (Fully Unattended, Hardened Telemetry)
+advice: 
+version: 1
+productversion: 16.0
+priority: 0
+licenseRequired: False
+productClasses: 
+setupScript: setup.ins
+uninstallScript: delsub.ins
+updateScript: 
+alwaysScript: 
+onceScript: 
+customScript: 
+
+[ProductProperty]
+name: productkey
+type: unicode
+multivalue: False
+editable: True
+description: Microsoft Office Produktschlüssel (MAK oder GVLK/KMS Key)
+default: [""]
+
+[ProductProperty]
+name: activation_type
+type: unicode
+multivalue: False
+editable: True
+description: Aktivierungsmethode (AUTO = Automatisch/GUI Key, MAK = Online/MAK Key, KMS = KMS Host)
+values: ["AUTO", "MAK", "KMS"]
+default: ["AUTO"]
+
+[ProductProperty]
+name: kms_server
+type: unicode
+multivalue: False
+editable: True
+description: KMS Server FQDN oder IP (optional, z. B. kms.domain.local)
+default: [""]
+
+[ProductProperty]
+name: telemetry_level
+type: unicode
+multivalue: False
+editable: True
+description: Telemetrie-Stufe (none = Maximale Härtung/Telemetrie blockiert, basic = Minimales Logging)
+values: ["none", "basic"]
+default: ["none"]
+
+[ProductProperty]
+name: install_architecture
+type: unicode
+multivalue: False
+editable: True
+description: Office Architektur (64 = 64-Bit, 32 = 32-Bit)
+values: ["64", "32"]
+default: ["64"]

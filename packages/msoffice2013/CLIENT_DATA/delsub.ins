@@ -1,0 +1,24 @@
+; ============================================================================
+; OPSI Uninstall Script for Microsoft Office
+; ============================================================================
+
+[Actions]
+requiredWinstVersion >= "4.12.0"
+ScriptErrorMessages = off
+
+DefVar $ExitCode$
+
+Message "Deinstalliere Microsoft Office..."
+
+WinBatch_UninstallOffice
+Set $ExitCode$ = LastExitCode
+
+if ($ExitCode$ = "0") or ($ExitCode$ = "3010")
+    Comment "Deinstallation erfolgreich abgeschlossen."
+else
+    LogError "Deinstallation fehlgeschlagen mit ExitCode " + $ExitCode$
+    isFatalError "Uninstall Failed"
+endif
+
+[WinBatch_UninstallOffice]
+"%ScriptPath%\setup.exe" /configure "%ScriptPath%\uninstall.xml"

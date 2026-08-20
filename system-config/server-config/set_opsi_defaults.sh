@@ -35,6 +35,10 @@ set_property "google-chrome" "desktop_icon" "false"
 
 set_property "msoffice" "desktop_icon" "false"
 
+set_property "msoffice2013" "telemetry_level" "none"
+set_property "msoffice2013" "activation_type" "AUTO"
+set_property "msoffice2013" "install_architecture" "64"
+
 # Client Agent Härtung (optional, z.B. kein Kiosk oder reduziertes Logging)
 set_property "opsi-client-agent" "log_level" "4"
 

@@ -1,0 +1,97 @@
+; ============================================================================
+; OPSI Setup Script for Microsoft Office (ODT, Unattended, Telemetrie-gehärtet)
+; ============================================================================
+
+[Actions]
+requiredWinstVersion >= "4.12.0"
+ScriptErrorMessages = off
+
+DefVar $ProductId$
+DefVar $MinimumSpace$
+DefVar $InstallDir$
+DefVar $ExitCode$
+DefVar $ProductKey$
+DefVar $ActivationType$
+DefVar $KMSServer$
+DefVar $TelemetryLevel$
+DefVar $InstallArch$
+DefVar $ScriptPath$
+DefVar $XmlFile$
+DefVar $PowerShellExec$
+
+Set $ProductId$ = "msoffice2013"
+Set $MinimumSpace$ = "3000 MB"
+Set $ScriptPath$ = "%ScriptPath%"
+Set $XmlFile$ = $ScriptPath$ + "\configuration.xml"
+
+; Freien Speicherplatz prüfen
+if not(HasMinimumSpace("%SystemDrive%", $MinimumSpace$))
+    LogError "Nicht genügend freier Speicherplatz auf %SystemDrive% (Mindestens " + $MinimumSpace$ + " erforderlich)."
+    isFatalError "Not Enough Space"
+endif
+
+; OPSI Properties einlesen
+Set $ProductKey$ = GetProductProperty("productkey", "")
+Set $ActivationType$ = GetProductProperty("activation_type", "AUTO")
+Set $KMSServer$ = GetProductProperty("kms_server", "")
+Set $TelemetryLevel$ = GetProductProperty("telemetry_level", "none")
+Set $InstallArch$ = GetProductProperty("install_architecture", "64")
+
+Message "Installiere Microsoft Office (Fully Unattended & Telemetrie-gehärtet)..."
+
+; 1. Dynamische Produktschlüssel- und KMS-Anpassung
+if not($ProductKey$ = "")
+    Comment "Produktschlüssel aus OPSI GUI erkannt: " + $ProductKey$
+    ExecWith_InjectKey powershell.exe
+endif
+
+if not($KMSServer$ = "")
+    Comment "KMS-Server angegeben: " + $KMSServer$
+    WinBatch_SetKMSServer
+endif
+
+; 2. Installation via Office Deployment Tool (ODT) durchführen
+WinBatch_InstallOffice
+Set $ExitCode$ = LastExitCode
+
+if ($ExitCode$ = "0") or ($ExitCode$ = "3010")
+    Comment "Office Installation erfolgreich abgeschlossen (ExitCode: " + $ExitCode$ + ")."
+else
+    LogError "Office Installation fehlgeschlagen mit ExitCode " + $ExitCode$
+    isFatalError "Installation Failed"
+endif
+
+; 3. Telemetrie-Härtung anwenden (falls telemetry_level = none)
+if ($TelemetryLevel$ = "none")
+    Message "Wende Telemetrie-Härtung und Richtlinien an..."
+    ExecWith_ApplyHardening powershell.exe
+    WinBatch_DisableTelemetryTasks
+endif
+
+[WinBatch_InstallOffice]
+"%ScriptPath%\setup.exe" /configure "%ScriptPath%\configuration.xml"
+
+[WinBatch_SetKMSServer]
+cscript.exe "%ProgramFiles%\Microsoft Office\Office16\OSPP.VBS" /sethst:$KMSServer$
+
+[WinBatch_DisableTelemetryTasks]
+schtasks.exe /Change /TN "\Microsoft\Office\Office Telemetry Agent Log Upload" /Disable
+schtasks.exe /Change /TN "\Microsoft\Office\Office Telemetry Agent Fallback" /Disable
+schtasks.exe /Change /TN "\Microsoft\Office\Office Feature Updates" /Disable
+schtasks.exe /Change /TN "\Microsoft\Office\Office Feature Updates Logon" /Disable
+
+[ExecWith_InjectKey]
+param([string]$key = "$ProductKey$")
+$xmlPath = "$env:OPSI_ScriptPath\configuration.xml"
+if (Test-Path $xmlPath) {
+    [xml]$xml = Get-Content $xmlPath
+    $productNode = $xml.Configuration.Add.Product
+    if ($productNode) {
+        $productNode.SetAttribute("PIDKEY", "$key")
+        $xml.Save($xmlPath)
+        Write-Output "[OK] Produktschlüssel erfolgreich in configuration.xml eingetragen."
+    }
+}
+
+[ExecWith_ApplyHardening]
+& "$env:OPSI_ScriptPath\scripts\Toggle-OfficeFeatures.ps1" -DisableFeatures
