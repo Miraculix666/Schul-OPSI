@@ -1,4 +1,4 @@
-<Configuration ID="37d836e6-cb72-4949-8db4-7b64e4604890">
+﻿<Configuration ID="37d836e6-cb72-4949-8db4-7b64e4604890">
   <Info Description="MS Office - Telemetriearme Unattended Installation (Basis: Polizei NRW LAFP)" />
   <Add OfficeClientEdition="64" Channel="PerpetualVL2021" MigrateArch="TRUE">
     <Product ID="ProPlus2021Volume">
@@ -17,7 +17,7 @@
   <Updates Enabled="FALSE" />
   <RemoveMSI />
   <AppSettings>
-    <Setup Name="Company" Value="Schul-OPSI" />
+    <Setup Name="Company" Value="opsi_scripts" />
     <!-- Standard-Dateiformate (OpenXML) -->
     <User Key="software\microsoft\office\16.0\excel\options" Name="defaultformat" Value="51" Type="REG_DWORD" App="excel16" Id="L_SaveExcelfilesas" />
     <User Key="software\microsoft\office\16.0\powerpoint\options" Name="defaultformat" Value="27" Type="REG_DWORD" App="ppt16" Id="L_SavePowerPointfilesas" />
