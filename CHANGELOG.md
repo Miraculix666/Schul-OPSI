@@ -1,4 +1,4 @@
-﻿# Changelog - Schul-OPSI
+# Changelog - opsi_scripts
 
 ## [1.1.0] - 2026-06-16
 ### Added
@@ -12,3 +12,4 @@
 
 ### Removed
 - Redundant packages and untracked temporary dumps.
+

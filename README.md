@@ -7,7 +7,7 @@
 >
 > All new development and maintenance MUST occur in the modular repositories above using `pyinfra` and `just`.
 
-# Schul-OPSI — Enterprise Deployment & Automation Infrastructure
+# opsi_scripts — Enterprise Deployment & Automation Infrastructure
 
 > **Architecture Split SSOT**: This repository is structured into two cleanly separated domains:
 > 1. **`system-config/`**: Specific environment configuration, server endpoints, and unattend files for the operated training system (`sopsi`).
@@ -18,7 +18,7 @@
 ## 📂 Repository Structure
 
 ```
-Schul-OPSI/
+opsi_scripts/
 │
 ├── 📂 system-config/               # 1. SPECIFIC SYSTEM CONFIGURATION (Operated System 'sopsi')
 │   ├── README.md                   # Environment architecture, endpoints, and deployment guide
@@ -102,4 +102,5 @@ bats toolkit/tests/bats/*.bats
 
 Real credentials, server passwords, and private tokens must **never** be committed to Git.
 - Real environment configurations are gitignored or referenced via environment variables (`OPSI_PASSWORD`, `HF_TOKEN`).
-- See [`system-config/environment.json`](file:///c:/GitHub/Schul-OPSI/system-config/environment.json) for the configuration schema.
+- See [`system-config/environment.json`](file:///c:/GitHub/opsi_scripts/system-config/environment.json) for the configuration schema.
+

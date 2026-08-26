@@ -1,4 +1,4 @@
-﻿<#
+<#
     FILE: Deploy-ToServer.ps1
     PURPOSE: Automatisierter Deploy-Workflow: Build WinPE + Hardening-Paket auf OPSI-Server
     LAST MODIFIED: 2026-04-23
@@ -27,7 +27,7 @@ $RepoRoot = Split-Path $ScriptDir -Parent
 $EnvFile = Join-Path $RepoRoot "config\environment.json"
 
 Write-Host "`n================================================================" -ForegroundColor Cyan
-Write-Host "   Schul-OPSI Deploy Pipeline V1.0" -ForegroundColor Cyan
+Write-Host "   opsi_scripts Deploy Pipeline V1.0" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 
 # 1. Environment laden
@@ -121,4 +121,5 @@ Write-Host "  systemctl restart opsiconfd" -ForegroundColor Gray
 Write-Host ""
 
 Write-Host "Deploy-Pipeline abgeschlossen." -ForegroundColor Green
+
 

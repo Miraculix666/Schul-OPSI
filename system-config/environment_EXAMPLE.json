@@ -1,5 +1,5 @@
 {
-    "_comment": "Schul-OPSI Zentrale Konfigurations-Vorlage (Blueprint)",
+    "_comment": "opsi_scripts Zentrale Konfigurations-Vorlage (Blueprint)",
 
     "Build": {
         "IsoPath": "D:\\temp\\WinPE.ISO",
@@ -63,3 +63,4 @@
         "ScriptVersion": "3.0.0"
     }
 }
+

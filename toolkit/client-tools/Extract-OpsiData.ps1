@@ -1,5 +1,5 @@
 $ErrorActionPreference = "Stop"
-$target = "C:\GitHub" + "\Schul-OPSI"
+$target = "C:\GitHub" + "\opsi_scripts"
 $sourcePath = "C:\GitHub\scripts-and-tools-pol\OPSI"
 
 Write-Host "Creating target folder..."
@@ -22,9 +22,9 @@ Set-Content -Path "$target\version.json" -Value $versionJson -Encoding utf8
 
 $packageJson = @"
 {
-  "name": "schul-opsi",
+  "name": "opsi_scripts",
   "version": "1.0.0",
-  "description": "Schul-OPSI Repository",
+  "description": "opsi_scripts Repository",
   "author": "",
   "license": "ISC"
 }
@@ -35,15 +35,15 @@ Write-Host "Initializing git in target..."
 Set-Location $target
 git init
 git add .
-git commit -m "feat(repo): initial extraction of OPSI to Schul-OPSI"
+git commit -m "feat(repo): initial extraction of OPSI to opsi_scripts"
 
-Write-Host "Creating Schul-OPSI.code-workspace..."
-$wsPath = "C:\GitHub" + "\Schul-OPSI.code-workspace"
+Write-Host "Creating opsi_scripts.code-workspace..."
+$wsPath = "C:\GitHub" + "\opsi_scripts.code-workspace"
 $wsContent = @"
 {
 	"folders": [
 		{
-			"path": "Schul-OPSI"
+			"path": "opsi_scripts"
 		}
 	],
 	"settings": {}
@@ -55,6 +55,7 @@ Write-Host "Removing OPSI from source repo and committing..."
 Set-Location "C:\GitHub\scripts-and-tools-pol"
 Remove-Item -Path $sourcePath -Recurse -Force
 git add OPSI
-git commit -m "refactor(opsi): extracted OPSI to Schul-OPSI repository"
+git commit -m "refactor(opsi): extracted OPSI to opsi_scripts repository"
 
 Write-Host "Done."
+

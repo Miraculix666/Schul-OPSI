@@ -1,4 +1,4 @@
-# OPSI-Agent: Schul-OPSI Deployment (agent.md)
+# OPSI-Agent: opsi_scripts Deployment (agent.md)
 *This file contains specialized instructions, inventory, and workflows for OPSI deployment and client management.*
 
 ## 🧠 Core System Intelligence
@@ -11,3 +11,4 @@
 ### 🛠️ Specialized Workflows
 - **Unattended Executions**: All deployment modules must support silent/non-interactive installation options (e.g. `--silent`, `-qn`).
 - **Log Collection**: Detailed logging of installer return codes and diagnostic outputs.
+

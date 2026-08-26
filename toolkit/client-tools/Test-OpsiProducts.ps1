@@ -14,7 +14,7 @@ if (-not (Test-Path $ProductsDir)) {
 
 
 Write-Host "================================================================" -ForegroundColor Cyan
-Write-Host "   Schul-OPSI Richtlinien-Validator V1.0" -ForegroundColor Cyan
+Write-Host "   opsi_scripts Richtlinien-Validator V1.0" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 
 if (-not (Test-Path $ProductsDir)) {
@@ -75,3 +75,4 @@ if ($AnyFailed) {
     Write-Host "  VALIDIERUNG ERFOLGREICH: Alle Produkte entsprechen den Richtlinien." -ForegroundColor Green
     Exit 0
 }
+

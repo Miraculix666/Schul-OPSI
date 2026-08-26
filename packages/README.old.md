@@ -1,6 +1,6 @@
 # Richtlinien für OPSI-Produkte (Conventions)
 
-Dieses Verzeichnis enthält die OPSI-Produkte für die Schul-OPSI-Umgebung. Jedes Unterverzeichnis repräsentiert ein eigenständiges OPSI-Produkt. Das Verzeichnis `OPSI-Produkte` selbst ist kein OPSI-Produkt.
+Dieses Verzeichnis enthält die OPSI-Produkte für die opsi_scripts-Umgebung. Jedes Unterverzeichnis repräsentiert ein eigenständiges OPSI-Produkt. Das Verzeichnis `OPSI-Produkte` selbst ist kein OPSI-Produkt.
 
 ---
 
@@ -48,3 +48,4 @@ OPSI-Produkte/
   * **Zweck**: Was macht das Produkt?
   * **Parameter**: Welche Konfigurationsmöglichkeiten (`ProductProperties`) gibt es und was bewirken sie?
   * **Hinweise**: Besondere Voraussetzungen oder Systemeingriffe.
+

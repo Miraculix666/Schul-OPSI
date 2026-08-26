@@ -1,5 +1,5 @@
 {
-    "_comment": "Schul-OPSI Zentrale Konfiguration – Wird von Build-WinPE.ps1 und Deploy-Skripten gelesen",
+    "_comment": "opsi_scripts Zentrale Konfiguration – Wird von Build-WinPE.ps1 und Deploy-Skripten gelesen",
 
     "Build": {
         "_comment_IsoPath": "Pfad zur WinPE-Quell-ISO (ADK-basiert oder Windows PE ISO)",
@@ -87,3 +87,4 @@
         "ScriptVersion": "3.0.0"
     }
 }
+
